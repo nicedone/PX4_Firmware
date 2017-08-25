@@ -200,11 +200,32 @@ PARAM_DEFINE_FLOAT(CAL_MAG0_XSCALE, 1.0f);
 PARAM_DEFINE_FLOAT(CAL_MAG0_YSCALE, 1.0f);
 
 /**
- * Magnetometer Z-axis scaling factor
+ * Magnetometer Y-axis scaling factor
  *
  * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(CAL_MAG0_ZSCALE, 1.0f);
+
+/**
+ * Magnetometer X-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG0_XODIAG, 0.0f);
+
+/**
+ * Magnetometer Y-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG0_YODIAG, 0.0f);
+
+/**
+ * Magnetometer Z-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG0_ZODIAG, 0.0f);
 
 /**
  * ID of the Accelerometer that the calibration is for.
@@ -414,6 +435,27 @@ PARAM_DEFINE_FLOAT(CAL_MAG1_YSCALE, 1.0f);
 PARAM_DEFINE_FLOAT(CAL_MAG1_ZSCALE, 1.0f);
 
 /**
+ * Magnetometer X-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_XODIAG, 0.0f);
+
+/**
+ * Magnetometer Y-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_YODIAG, 0.0f);
+
+/**
+ * Magnetometer Z-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_ZODIAG, 0.0f);
+
+/**
  * ID of the Accelerometer that the calibration is for.
  *
  * @group Sensor Calibration
@@ -621,6 +663,27 @@ PARAM_DEFINE_FLOAT(CAL_MAG2_YSCALE, 1.0f);
 PARAM_DEFINE_FLOAT(CAL_MAG2_ZSCALE, 1.0f);
 
 /**
+ * Magnetometer X-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_XODIAG, 0.0f);
+
+/**
+ * Magnetometer Y-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_YODIAG, 0.0f);
+
+/**
+ * Magnetometer Z-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_ZODIAG, 0.0f);
+
+/**
  * ID of the Accelerometer that the calibration is for.
  *
  * @group Sensor Calibration
@@ -766,6 +829,26 @@ PARAM_DEFINE_FLOAT(CAL_MAG3_YSCALE, 1.0f);
  */
 PARAM_DEFINE_FLOAT(CAL_MAG3_ZSCALE, 1.0f);
 
+/**
+ * Magnetometer X-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_XODIAG, 0.0f);
+
+/**
+ * Magnetometer Y-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_YODIAG, 0.0f);
+
+/**
+ * Magnetometer Z-axis off diag factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_ZODIAG, 0.0f);
 
 /**
  * Primary accel ID

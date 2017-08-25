@@ -172,27 +172,41 @@ int initialize_parameter_handles(ParameterHandles &parameter_handles)
 	(void)param_find("CAL_MAG2_ROT");
 	(void)param_find("CAL_MAG3_ROT");
 	(void)param_find("CAL_MAG_SIDES");
+	(void)param_find("CAL_MAG0_XODIAG");
+	(void)param_find("CAL_MAG0_YODIAG");
+	(void)param_find("CAL_MAG0_ZODIAG");
+
 
 	(void)param_find("CAL_MAG1_XOFF");
 	(void)param_find("CAL_MAG1_XSCALE");
+	(void)param_find("CAL_MAG1_XODIAG");
 	(void)param_find("CAL_MAG1_YOFF");
 	(void)param_find("CAL_MAG1_YSCALE");
+	(void)param_find("CAL_MAG1_YODIAG");
 	(void)param_find("CAL_MAG1_ZOFF");
 	(void)param_find("CAL_MAG1_ZSCALE");
+	(void)param_find("CAL_MAG1_ZODIAG");
+	
 
 	(void)param_find("CAL_MAG2_XOFF");
 	(void)param_find("CAL_MAG2_XSCALE");
+	(void)param_find("CAL_MAG2_XODIAG");
 	(void)param_find("CAL_MAG2_YOFF");
 	(void)param_find("CAL_MAG2_YSCALE");
+	(void)param_find("CAL_MAG2_YODIAG");
 	(void)param_find("CAL_MAG2_ZOFF");
 	(void)param_find("CAL_MAG2_ZSCALE");
+	(void)param_find("CAL_MAG2_ZODIAG");
 
 	(void)param_find("CAL_MAG3_XOFF");
 	(void)param_find("CAL_MAG3_XSCALE");
+	(void)param_find("CAL_MAG3_XODIAG");
 	(void)param_find("CAL_MAG3_YOFF");
 	(void)param_find("CAL_MAG3_YSCALE");
+	(void)param_find("CAL_MAG3_YODIAG");
 	(void)param_find("CAL_MAG3_ZOFF");
 	(void)param_find("CAL_MAG3_ZSCALE");
+	(void)param_find("CAL_MAG3_ZODIAG");
 
 	(void)param_find("CAL_GYRO1_XOFF");
 	(void)param_find("CAL_GYRO1_XSCALE");
