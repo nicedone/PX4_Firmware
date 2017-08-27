@@ -36,15 +36,18 @@ file(GLOB_RECURSE copy_apps_files
 	${CMAKE_CURRENT_SOURCE_DIR}/apps/*)
 
 # copy nuttx to build directory
+set(NUTTX_DIR ${CMAKE_CURRENT_BINARY_DIR}/nuttx)
+set(NUTTX_CONFIG_DIR ${PX4_SOURCE_DIR}/nuttx-configs)
 add_custom_command(OUTPUT nuttx_copy.stamp
 	COMMAND ${cp_cmd} ${cp_opts} ${CMAKE_CURRENT_SOURCE_DIR}/nuttx ${CMAKE_CURRENT_BINARY_DIR}
-	COMMAND cmake -E touch nuttx_copy.stamp
+	COMMAND rm -rf ${NUTTX_DIR}/libxx/libcxx
+	COMMAND rm -rf ${NUTTX_DIR}/include/libcxx
+	COMMAND rm -rf ${NUTTX_DIR}/include/machine
+	COMMAND cd ${PX4_SOURCE_DIR}/platforms/nuttx/NuttX/libcxx && ./install.sh ${NUTTX_DIR}
+	COMMAND cmake -E touch ${CMAKE_CURRENT_BINARY_DIR}/nuttx_copy.stamp
 	DEPENDS ${copy_nuttx_files}
 	COMMENT "Copying NuttX/nuttx to ${CMAKE_CURRENT_BINARY_DIR}"
 	)
-
-set(NUTTX_DIR ${CMAKE_CURRENT_BINARY_DIR}/nuttx)
-set(NUTTX_CONFIG_DIR ${PX4_SOURCE_DIR}/nuttx-configs)
 
 # copy apps to build directory
 add_custom_command(OUTPUT apps_copy.stamp

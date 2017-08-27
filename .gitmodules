@@ -43,6 +43,9 @@
 [submodule "platforms/nuttx/NuttX/apps"]
 	path = platforms/nuttx/NuttX/apps
 	url = https://github.com/PX4-NuttX/apps.git
+[submodule "platforms/nuttx/NuttX/libcxx"]
+	path = platforms/nuttx/NuttX/libcxx
+	url = https://github.com/PX4/libcxx.git
 [submodule "cmake/configs/uavcan_board_ident"]
 	path = cmake/configs/uavcan_board_ident
 	url = https://github.com/PX4/uavcan_board_ident.git

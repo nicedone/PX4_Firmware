@@ -70,8 +70,10 @@ endif
 
 # Pull in *just* libm from the toolchain ... this is grody
 
-LIBM			 = "${shell $(CC) $(ARCHCPUFLAGS) -print-file-name=libm.a}"
-EXTRA_LIBS		+= $(LIBM)
+LIBM		= "${shell $(CC) $(ARCHCPUFLAGS) -print-file-name=libm.a}"
+LIBSUPXX	= ${shell $(CC) $(CXXFLAGS) --print-file-name=libsupc++.a}
+EXTRA_LIBPATHS	= -L "${shell dirname "$(LIBSUPXX)"}"
+EXTRA_LIBS	+= $(LIBM) $(LIBSUPXX)
 
 # Use our linker script
 
@@ -98,7 +100,7 @@ else
     # Linux/Cygwin-native toolchain
     MKDEP		 = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
     ARCHINCLUDES	 = -I. -isystem $(TOPDIR)/include
-    ARCHXXINCLUDES	 = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+    ARCHXXINCLUDES	 = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx -isystem $(TOPDIR)/include/libcxx
     ARCHSCRIPT		 = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
   endif
 endif
@@ -124,7 +126,7 @@ ARCHOPTIMIZATION	+= -g
 endif
 
 ARCHCFLAGS		 = -std=gnu99
-ARCHCXXFLAGS		 = -fno-exceptions -fno-rtti -std=gnu++0x
+ARCHCXXFLAGS		 = -fno-exceptions -fno-rtti -std=c++11
 ARCHWARNINGS		 = $(PX4_ARCHWARNINGS)
 ARCHCWARNINGS		 = $(PX4_ARCHWARNINGS) $(PX4_ARCHCWARNINGS)
 ARCHWARNINGSXX		 = $(ARCHWARNINGS) $(PX4_ARCHWARNINGSXX)
@@ -138,7 +140,11 @@ EXTRA_LIBS		+= --warn-common \
 
 CFLAGS			 = $(ARCHCFLAGS) $(ARCHCWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(INSTRUMENTATIONDEFINES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe -fno-common
 CPICFLAGS		 = $(ARCHPICFLAGS) $(CFLAGS)
+
 CXXFLAGS		 = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(INSTRUMENTATIONDEFINES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CXXFLAGS		+= -D__NuttX__ -fno-builtin -fcheck-new -Wno-c++14-compat -Wno-maybe-uninitialized
+CXXFLAGS		+= -D_LIBCPP_BUILD_STATIC -D_LIBCPP_NO_EXCEPTIONS -DCLOCK_MONOTONIC
+
 CXXPICFLAGS		 = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS		 = $(ARCHINCLUDES) $(INSTRUMENTATIONDEFINES) $(ARCHDEFINES) $(EXTRADEFINES)
 AFLAGS			 = $(CFLAGS) -D__ASSEMBLY__
