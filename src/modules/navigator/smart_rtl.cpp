@@ -3,11 +3,6 @@
  * RC recovery navigation mode
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#include <fcntl.h>
-
 #include <systemlib/mavlink_log.h>
 #include <systemlib/err.h>
 #include <geo/geo.h>
@@ -34,15 +29,13 @@ SmartRTL::SmartRTL(Navigator *navigator, const char *name) :
 	on_inactive();
 }
 
-SmartRTL::~SmartRTL()
-{
-}
 
 void SmartRTL::on_inactive()
 {
-	_tracker = NULL;
+	_tracker = nullptr;
 	deadline = HRT_ABSTIME_MAX;
 }
+
 
 void SmartRTL::on_activation()
 {
@@ -78,6 +71,7 @@ void SmartRTL::on_activation()
 	update_deadline();
 }
 
+
 void SmartRTL::on_active()
 {
 	// If the tracker fails, do the same as if the deadline was reached
@@ -88,7 +82,7 @@ void SmartRTL::on_active()
 
 	if (deadline <= hrt_absolute_time()) {
 
-		_tracker = NULL;
+		_tracker = nullptr;
 		deadline = HRT_ABSTIME_MAX;
 
 		if (land_after_deadline) {
@@ -131,6 +125,7 @@ void SmartRTL::on_active()
 #endif
 }
 
+
 void SmartRTL::update_deadline()
 {
 	updateParams();
@@ -145,6 +140,7 @@ void SmartRTL::update_deadline()
 		deadline = hrt_absolute_time() + (hrt_abstime)(delay * 1e6f);
 	}
 }
+
 
 void SmartRTL::init_setpoint(position_setpoint_s &sp)
 {
@@ -168,15 +164,19 @@ void SmartRTL::init_setpoint(position_setpoint_s &sp)
 
 float SmartRTL::distance_to_setpoint(position_setpoint_s &sp)
 {
-	float distance_xy, distance_z;
+	float distance_xy;
+	float distance_z;
+
 	get_distance_to_point_global_wgs84(
 		_navigator->get_global_position()->lat,
 		_navigator->get_global_position()->lon,
 		_navigator->get_global_position()->alt,
 		sp.lat, sp.lon, sp.alt,
 		&distance_xy, &distance_z);
-	return sqrt(distance_xy * distance_xy + distance_z * distance_z);
+
+	return sqrtf(distance_xy * distance_xy + distance_z * distance_z);
 }
+
 
 float SmartRTL::bearing_to_setpoint(position_setpoint_s &sp)
 {
