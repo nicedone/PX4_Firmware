@@ -2104,6 +2104,19 @@ MulticopterPositionControl::generate_attitude_setpoint(float dt)
 	/* control roll and pitch directly if no aiding velocity controller is active */
 	if (!_control_mode.flag_control_velocity_enabled) {
 
+		bool use_new_behavior = _manual.aux1 > 0.5f;
+		static bool prev_val = false;
+
+		if (use_new_behavior != prev_val) {
+			PX4_WARN("using new input behavior: %i", (int)use_new_behavior);
+			prev_val = use_new_behavior;
+		}
+
+		if (!use_new_behavior) {
+			_att_sp.roll_body = _manual.y * _params.man_tilt_max;
+			_att_sp.pitch_body = -_manual.x * _params.man_tilt_max;
+		} else {
+
 		/*
 		 * Input mapping for roll & pitch setpoints
 		 * ----------------------------------------
@@ -2153,6 +2166,8 @@ MulticopterPositionControl::generate_attitude_setpoint(float dt)
 		_att_sp.pitch_body = euler_sp(1);
 		_att_sp.yaw_body += euler_sp(2);
 
+		}
+
 		/* only if optimal recovery is not used, modify roll/pitch */
 		if (_params.opt_recover <= 0) {
 			// construct attitude setpoint rotation matrix. modify the setpoints for roll
@@ -2193,6 +2208,16 @@ MulticopterPositionControl::generate_attitude_setpoint(float dt)
 
 		/* copy quaternion setpoint to attitude setpoint topic */
 		matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
+
+//		static int counter = 0;
+//		if (counter++ % 30 == 0) {
+//			matrix::Eulerf euler_sp = q_sp;
+//			PX4_INFO("r=%6.1f p=%6.1f y=%6.1f ysp=%6.1f _yaw=%6.1f newb=%i", (double)(euler_sp(0)*180.f/M_PI_F),
+//					(double)(euler_sp(1)*180.f/M_PI_F),(double)(euler_sp(2)*180.f/M_PI_F),
+//					(double)(_att_sp.yaw_body*180.f/M_PI_F),(double)(_yaw*180.f/M_PI_F),
+//					(int)use_new_behavior);
+//		}
+//
 		q_sp.copyTo(_att_sp.q_d);
 		_att_sp.q_d_valid = true;
 	}
