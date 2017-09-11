@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2017 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,10 +31,10 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE drivers__boards__sitl
+	MODULE drivers__boards__eagle
 	COMPILE_FLAGS
 	SRCS
-		sitl_led.c
+		../common/board_identity.c
 	DEPENDS
 		platforms__common
 	)
