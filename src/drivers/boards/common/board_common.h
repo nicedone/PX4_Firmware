@@ -382,6 +382,7 @@ typedef uint8_t px4_guid_t[PX4_GUID_BYTE_LENGTH];
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+__BEGIN_DECLS
 
 /* Provide an interface for reading the connected state of VBUS */
 
@@ -703,7 +704,7 @@ __EXPORT int board_get_uuid32_formated(char *format_buffer, int size,
  *
  * Description:
  *   All boards either provide a way to retrieve a manufactures Unique ID or
- *   define BOARD_OVERRIDE_MFGUID.
+ *   define BOARD_OVERRIDE_UUID.
  *    The MFGUID is returned as an array of bytes in
  *    MSD @ index 0 - LSD @ index PX4_CPU_MFGUID_BYTE_LENGTH-1
  *
@@ -744,7 +745,7 @@ int board_get_mfguid_formated(char *format_buffer, int size); // DEPRICATED use 
  *
  * Description:
  *   All boards either provide a way to retrieve a PX4 Globally unique ID or
- *   define BOARD_OVERRIDE_PX4_GUID.
+ *   define BOARD_OVERRIDE_UUID.
  *
  *   The form of the GUID is as follows:
  *  offset:0         1         2         -           17
