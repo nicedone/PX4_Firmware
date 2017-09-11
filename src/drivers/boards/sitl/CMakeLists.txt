@@ -35,6 +35,7 @@ px4_add_module(
 	COMPILE_FLAGS
 	SRCS
 		sitl_led.c
+		../common/board_identity.c
 	DEPENDS
 		platforms__common
 	)
