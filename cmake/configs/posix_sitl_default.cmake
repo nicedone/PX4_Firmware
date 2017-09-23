@@ -83,6 +83,11 @@ set(config_module_list
 	modules/position_estimator_inav
 
 	#
+	# Modelica
+	#
+	modules/omc_example
+
+	#
 	# Vehicle Control
 	#
 	modules/fw_att_control

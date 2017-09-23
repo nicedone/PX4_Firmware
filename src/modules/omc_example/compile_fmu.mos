@@ -1,0 +1,2 @@
+loadFile("../Controller.mo"); getErrorString();
+translateModelFMU(Controller); getErrorString();
