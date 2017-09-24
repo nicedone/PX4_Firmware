@@ -51,14 +51,16 @@ set(model_sources
 	Controller_15syn.c
 	Controller_16dae.c
 	Controller_17inl.c
-	Controller.c
 	Controller_functions.c
 	Controller_records.c
+	#Controller.c
 )
 
 add_custom_command(
-	OUTPUT  ${model_sources}
+	OUTPUT  ${model_sources} ${PX4_BINARY_DIR}/tmp/Controller_init.xml
 	COMMAND ${OMC} -s ${CMAKE_CURRENT_SOURCE_DIR}/Controller.mo
+	COMMAND sed -i 's/main/main2/g' Controller.c # hack to get rid of main
+	COMMAND mkdir -p ${PX4_BINARY_DIR}/tmp && cp Controller_init.xml ${PX4_BINARY_DIR}/tmp
     DEPENDS Controller.mo
 )
 
@@ -75,19 +77,37 @@ add_definitions(
 	-DOMC_NUM_LINEAR_SYSTEMS=0
 	-DOMC_NUM_NONLINEAR_SYSTEMS=0
 	-DOMC_NDELAY_EXPRESSIONS=0
-	-DOMC_NVAR_STRING=0)
+	-DOMC_NVAR_STRING=0
+	#-Dmain=omc_example_main
+	#-DEXIT=void
+	)
 
 px4_add_module(
 	MODULE modules__omc_example
-	MAIN main
+	MAIN omc_example
 	COMPILE_FLAGS
-	-Wno-strict-prototypes -Wno-float-equal -Wno-unused-variable
-	-Wno-missing-prototypes -Wno-missing-declarations
-	-Wno-sign-compare -Wno-shadow -Wno-unused-function -Wno-clobbered
+		-Wno-strict-prototypes
+		-Wno-float-equal
+		-Wno-missing-prototypes
+		-Wno-missing-declarations
+		-Wno-unused-variable
+		-Wno-sign-compare
+		-Wno-shadow
+		-Wno-unused-function
+		-Wno-clobbered
 	STACK_MAIN 5700
 	STACK_MAX 13000
-	SRCS ${model_sources}
+	SRCS
+		omc_example_main.c
+		${model_sources}
 	DEPENDS
 		platforms__common
 	)
-# vim: set noet ft=cmake fenc=utf-8 ff=unix :
+	
+find_library(SimulationRuntimeC NAMES SimulationRuntimeC PATHS /usr/lib/x86_64-linux-gnu/omc)
+
+
+target_link_libraries(modules__omc_example
+	${SimulationRuntimeC}
+	)
+
