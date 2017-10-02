@@ -10,5 +10,5 @@
 #define PX4_I2C_OBDEV_LED	0x55
 
 #define BOARD_OVERRIDE_UUID "SYSMEMID0000   " // must be of length 16
-#define PX4_SOC_ARCH_ID 0x1000
+#define PX4_SOC_ARCH_ID     PX4_SOC_ARCH_ID_QURT
 #include "../common/board_common.h"
