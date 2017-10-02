@@ -74,7 +74,6 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	_v_control_mode_sub(-1),
 	_params_sub(-1),
 	_manual_control_sp_sub(-1),
-	_armed_sub(-1),
 	_local_pos_sub(-1),
 	_pos_sp_triplet_sub(-1),
 	_airspeed_sub(-1),
@@ -108,7 +107,6 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	memset(&_actuators_out_1, 0, sizeof(_actuators_out_1));
 	memset(&_actuators_mc_in, 0, sizeof(_actuators_mc_in));
 	memset(&_actuators_fw_in, 0, sizeof(_actuators_fw_in));
-	memset(&_armed, 0, sizeof(_armed));
 	memset(&_local_pos, 0, sizeof(_local_pos));
 	memset(&_pos_sp_triplet, 0, sizeof(_pos_sp_triplet));
 	memset(&_airspeed, 0, sizeof(_airspeed));
@@ -215,19 +213,6 @@ void VtolAttitudeControl::vehicle_manual_poll()
 
 	if (updated) {
 		orb_copy(ORB_ID(manual_control_setpoint), _manual_control_sp_sub, &_manual_control_sp);
-	}
-}
-/**
-* Check for arming status updates.
-*/
-void VtolAttitudeControl::arming_status_poll()
-{
-	/* check if there is a new setpoint */
-	bool updated;
-	orb_check(_armed_sub, &updated);
-
-	if (updated) {
-		orb_copy(ORB_ID(actuator_armed), _armed_sub, &_armed);
 	}
 }
 
@@ -353,9 +338,12 @@ VtolAttitudeControl::parameters_update_poll()
 	orb_check(_params_sub, &updated);
 
 	if (updated) {
-		struct parameter_update_s param_update;
-		orb_copy(ORB_ID(parameter_update), _params_sub, &param_update);
-		parameters_update();
+		// only update params if disarmed or landed
+		if (!_v_control_mode.flag_armed || _land_detected.landed) {
+			struct parameter_update_s param_update;
+			orb_copy(ORB_ID(parameter_update), _params_sub, &param_update);
+			parameters_update();
+		}
 	}
 }
 
@@ -576,7 +564,7 @@ VtolAttitudeControl::parameters_update()
 
 	/* vtol lock elevons in multicopter */
 	param_get(_params_handles.elevons_mc_lock, &l);
-	_params.elevons_mc_lock = l;
+	_params.elevons_mc_lock = (l == 1);
 
 	/* minimum relative altitude for FW mode (QuadChute) */
 	param_get(_params_handles.fw_min_alt, &v);
@@ -653,8 +641,6 @@ VtolAttitudeControl::task_main_trampoline(int argc, char *argv[])
 
 void VtolAttitudeControl::task_main()
 {
-	fflush(stdout);
-
 	/* do subscriptions */
 	_v_att_sp_sub          = orb_subscribe(ORB_ID(vehicle_attitude_setpoint));
 	_mc_virtual_att_sp_sub = orb_subscribe(ORB_ID(mc_virtual_attitude_setpoint));
@@ -666,7 +652,6 @@ void VtolAttitudeControl::task_main()
 	_v_control_mode_sub    = orb_subscribe(ORB_ID(vehicle_control_mode));
 	_params_sub            = orb_subscribe(ORB_ID(parameter_update));
 	_manual_control_sp_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
-	_armed_sub             = orb_subscribe(ORB_ID(actuator_armed));
 	_local_pos_sub         = orb_subscribe(ORB_ID(vehicle_local_position));
 	_pos_sp_triplet_sub    = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_airspeed_sub          = orb_subscribe(ORB_ID(airspeed));
@@ -682,9 +667,6 @@ void VtolAttitudeControl::task_main()
 
 	/* update vtol vehicle status*/
 	_vtol_vehicle_status.fw_permanent_stab = (_params.vtol_fw_permanent_stab == 1);
-
-	// make sure we start with idle in mc mode
-	_vtol_type->set_idle_mc();
 
 	/* wakeup source*/
 	px4_pollfd_struct_t fds[2] = {};	/*input_mc, input_fw, parameters*/
@@ -748,7 +730,6 @@ void VtolAttitudeControl::task_main()
 		fw_virtual_att_sp_poll();
 		vehicle_control_mode_poll();	//Check for changes in vehicle control mode.
 		vehicle_manual_poll();			//Check for changes in manual inputs.
-		arming_status_poll();			//Check for arming status updates.
 		vehicle_attitude_setpoint_poll();//Check for changes in attitude set points
 		vehicle_attitude_poll();		//Check for changes in attitude
 		actuator_controls_mc_poll();	//Check for changes in mc_attitude_control output
@@ -833,10 +814,6 @@ void VtolAttitudeControl::task_main()
 				_vtol_type->update_transition_state();
 				fill_mc_att_rates_sp();
 			}
-
-		} else if (_vtol_type->get_mode() == EXTERNAL) {
-			// we are using external module to generate attitude/thrust setpoint
-			_vtol_type->update_external_state();
 		}
 
 		publish_att_sp();

@@ -43,16 +43,15 @@
 #define TAILSITTER_H
 
 #include "vtol_type.h"
-#include <systemlib/perf_counter.h>  /** is it necsacery? **/
 #include <systemlib/param/param.h>
 #include <drivers/drv_hrt.h>
 
-class Tailsitter : public VtolType
+class Tailsitter final : public VtolType
 {
 
 public:
 	Tailsitter(VtolAttitudeControl *_att_controller);
-	~Tailsitter();
+	~Tailsitter() = default;
 
 	virtual void update_vtol_state();
 	virtual void update_transition_state();
@@ -69,8 +68,6 @@ private:
 		float back_trans_dur;			/**< duration of back transition */
 		float airspeed_trans;			/**< airspeed at which we switch to fw mode after transition */
 		float airspeed_blend_start;		/**< airspeed at which we start blending mc/fw controls */
-		int elevons_mc_lock;			/**< lock elevons in multicopter mode */
-
 	} _params_tailsitter;
 
 	struct {
@@ -79,8 +76,6 @@ private:
 		param_t back_trans_dur;
 		param_t airspeed_trans;
 		param_t airspeed_blend_start;
-		param_t elevons_mc_lock;
-
 	} _params_handles_tailsitter;
 
 	enum vtol_mode {
@@ -105,16 +100,10 @@ private:
 	float _yaw_transition;	// yaw angle in which transition will take place
 	float _pitch_transition_start;  // pitch angle at the start of transition (tailsitter)
 
-
-	/** should this anouncement stay? **/
-	perf_counter_t	_loop_perf;			/**< loop performance counter */
-	perf_counter_t	_nonfinite_input_perf;		/**< performance counter for non finite input */
-
 	/**
 	 * Speed estimation for propwash controlled surfaces.
 	 */
 	void calc_tot_airspeed();
-
 
 	/** is this one still needed? */
 	void scale_mc_output();

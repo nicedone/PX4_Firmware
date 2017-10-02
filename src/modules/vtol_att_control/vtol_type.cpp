@@ -64,7 +64,6 @@ VtolType::VtolType(VtolAttitudeControl *att_controller) :
 	_actuators_out_1 = _attc->get_actuators_out1();
 	_actuators_mc_in = _attc->get_actuators_mc_in();
 	_actuators_fw_in = _attc->get_actuators_fw_in();
-	_armed = _attc->get_armed();
 	_local_pos = _attc->get_local_pos();
 	_airspeed = _attc->get_airspeed();
 	_batt_status = _attc->get_batt_status();
@@ -73,11 +72,6 @@ VtolType::VtolType(VtolAttitudeControl *att_controller) :
 	_params = _attc->get_params();
 
 	flag_idle_mc = true;
-}
-
-VtolType::~VtolType()
-{
-
 }
 
 /**
@@ -159,6 +153,7 @@ void VtolType::update_fw_state()
 {
 	// copy virtual attitude setpoint to real attitude setpoint
 	memcpy(_v_att_sp, _fw_virtual_att_sp, sizeof(vehicle_attitude_setpoint_s));
+
 	_mc_roll_weight = 0.0f;
 	_mc_pitch_weight = 0.0f;
 	_mc_yaw_weight = 0.0f;
@@ -190,13 +185,13 @@ void VtolType::update_transition_state()
 
 bool VtolType::can_transition_on_ground()
 {
-	return !_armed->armed || _land_detected->landed;
+	return !_v_control_mode->flag_armed || _land_detected->landed;
 }
 
 void VtolType::check_quadchute_condition()
 {
 
-	if (_armed->armed && !_land_detected->landed) {
+	if (_v_control_mode->flag_armed && !_land_detected->landed) {
 		matrix::Eulerf euler = matrix::Quatf(_v_att->q);
 
 		// fixed-wing minimum altitude
@@ -223,5 +218,85 @@ void VtolType::check_quadchute_condition()
 			}
 		}
 	}
+}
 
+bool
+VtolType::disable_mc_motors()
+{
+	const char *dev = PWM_OUTPUT0_DEVICE_PATH;
+	int fd = px4_open(dev, 0);
+
+	if (fd < 0) {
+		PX4_ERR("can't open %s", dev);
+		return false;
+	}
+
+	// first save the current max values
+	struct pwm_output_values max_pwm_values = {};
+
+	int ret = px4_ioctl(fd, PWM_SERVO_GET_MAX_PWM, (long unsigned int)&max_pwm_values);
+
+	if (ret == OK) {
+		_max_mc_pwm_values = max_pwm_values;
+
+	} else {
+		PX4_ERR("failed getting max values");
+		px4_close(fd);
+		return false;
+	}
+
+	// now get the disarmed PWM values
+	output_pwm_s disarmed_pwm_values = {};
+	ret = px4_ioctl(fd, PWM_SERVO_GET_DISARMED_PWM, (long unsigned int)&disarmed_pwm_values);
+
+	if (ret == OK) {
+
+		// finally disable by setting the MC motors max to the disarmed value
+		for (int i = 0; i < _params->vtol_motor_count; i++) {
+			max_pwm_values.values[i] = disarmed_pwm_values.values[i];
+			max_pwm_values.channel_count = _params->vtol_motor_count;
+		}
+
+		ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&max_pwm_values);
+
+		if (ret != OK) {
+			PX4_ERR("failed setting max values");
+		}
+
+	} else {
+		PX4_ERR("failed getting max values");
+	}
+
+	px4_close(fd);
+
+	return (ret == PX4_OK);
+}
+
+bool
+VtolType::enable_mc_motors()
+{
+	const char *dev = PWM_OUTPUT0_DEVICE_PATH;
+	int fd = px4_open(dev, 0);
+
+	if (fd < 0) {
+		PX4_ERR("can't open %s", dev);
+		return false;
+	}
+
+	struct pwm_output_values pwm_values = {};
+
+	for (int i = 0; i < _params->vtol_motor_count; i++) {
+		pwm_values.values[i] = _max_mc_pwm_values.values[i];
+		pwm_values.channel_count = _params->vtol_motor_count;
+	}
+
+	int ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&pwm_values);
+
+	if (ret != OK) {
+		PX4_ERR("failed setting max values");
+	}
+
+	px4_close(fd);
+
+	return (ret == PX4_OK);
 }

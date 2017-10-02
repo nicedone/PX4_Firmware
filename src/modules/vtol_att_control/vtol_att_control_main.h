@@ -63,7 +63,6 @@
 #include <systemlib/param/param.h>
 #include <systemlib/systemlib.h>
 
-#include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/battery_status.h>
@@ -114,7 +113,6 @@ public:
 	struct actuator_controls_s 			*get_actuators_out1() {return &_actuators_out_1;}
 	struct actuator_controls_s 			*get_actuators_mc_in() {return &_actuators_mc_in;}
 	struct actuator_controls_s 			*get_actuators_fw_in() {return &_actuators_fw_in;}
-	struct actuator_armed_s 			*get_armed() {return &_armed;}
 	struct vehicle_local_position_s 		*get_local_pos() {return &_local_pos;}
 	struct position_setpoint_triplet_s		*get_pos_sp_triplet() {return &_pos_sp_triplet;}
 	struct airspeed_s 				*get_airspeed() {return &_airspeed;}
@@ -124,11 +122,11 @@ public:
 
 	struct Params 					*get_params() {return &_params;}
 
-
 private:
 //******************flags & handlers******************************************************
 	bool _task_should_exit;
 	int _control_task;		//task handle for VTOL attitude controller
+
 	orb_advert_t _mavlink_log_pub;	// mavlink log uORB handle
 
 	/* handlers for subscriptions */
@@ -141,7 +139,6 @@ private:
 	int	_v_control_mode_sub;	//vehicle control mode subscription
 	int	_params_sub;			//parameter updates subscription
 	int	_manual_control_sp_sub;	//manual control setpoint subscription
-	int	_armed_sub;				//arming status subscription
 	int	_local_pos_sub;			// sensor subscription
 	int	_pos_sp_triplet_sub;			// local position setpoint subscription
 	int	_airspeed_sub;			// airspeed subscription
@@ -175,7 +172,6 @@ private:
 	struct actuator_controls_s			_actuators_out_1;	//actuator controls going to the fw mixer (used for elevons)
 	struct actuator_controls_s			_actuators_mc_in;	//actuator controls from mc_att_control
 	struct actuator_controls_s			_actuators_fw_in;	//actuator controls from fw_att_control
-	struct actuator_armed_s				_armed;				//actuator arming status
 	struct vehicle_local_position_s			_local_pos;
 	struct position_setpoint_triplet_s		_pos_sp_triplet;
 	struct airspeed_s 				_airspeed;			// airspeed
@@ -204,7 +200,7 @@ private:
 		param_t fw_qc_max_roll;
 		param_t front_trans_time_openloop;
 		param_t front_trans_time_min;
-	} _params_handles;
+	} _params_handles{};
 
 	/* for multicopters it is usual to have a non-zero idle speed of the engines
 	 * for fixed wings we want to have an idle speed of zero since we do not want
@@ -221,7 +217,6 @@ private:
 
 	void		vehicle_control_mode_poll();	//Check for changes in vehicle control mode.
 	void		vehicle_manual_poll();			//Check for changes in manual inputs.
-	void		arming_status_poll();			//Check for arming status updates.
 	void 		mc_virtual_att_sp_poll();
 	void 		fw_virtual_att_sp_poll();
 	void 		actuator_controls_mc_poll();	//Check for changes in mc_attitude_control output
@@ -238,9 +233,12 @@ private:
 	void		tecs_status_poll();
 	void		land_detected_poll();
 	void 		parameters_update_poll();		//Check if parameters have changed
+
 	int 		parameters_update();			//Update local paraemter cache
+
 	void 		fill_mc_att_rates_sp();
 	void 		fill_fw_att_rates_sp();
+
 	void		handle_command();
 	void 		publish_att_sp();
 };

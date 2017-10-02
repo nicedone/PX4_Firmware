@@ -54,9 +54,7 @@ Tailsitter::Tailsitter(VtolAttitudeControl *attc) :
 	_min_front_trans_dur(0.5f),
 	_thrust_transition_start(0.0f),
 	_yaw_transition(0.0f),
-	_pitch_transition_start(0.0f),
-	_loop_perf(perf_alloc(PC_ELAPSED, "vtol_att_control-tailsitter")),
-	_nonfinite_input_perf(perf_alloc(PC_COUNT, "vtol att control-tailsitter nonfinite input"))
+	_pitch_transition_start(0.0f)
 {
 	_vtol_schedule.flight_mode = MC_MODE;
 	_vtol_schedule.transition_start = 0;
@@ -72,20 +70,15 @@ Tailsitter::Tailsitter(VtolAttitudeControl *attc) :
 	_params_handles_tailsitter.back_trans_dur = param_find("VT_B_TRANS_DUR");
 	_params_handles_tailsitter.airspeed_trans = param_find("VT_ARSP_TRANS");
 	_params_handles_tailsitter.airspeed_blend_start = param_find("VT_ARSP_BLEND");
-	_params_handles_tailsitter.elevons_mc_lock = param_find("VT_ELEV_MC_LOCK");
 
+	set_idle_mc();
 }
 
-Tailsitter::~Tailsitter()
-{
-
-}
 
 void
 Tailsitter::parameters_update()
 {
 	float v;
-	int l;
 
 	/* vtol duration of a front transition */
 	param_get(_params_handles_tailsitter.front_trans_dur, &v);
@@ -106,10 +99,6 @@ Tailsitter::parameters_update()
 	/* vtol airspeed at which we start blending mc/fw controls */
 	param_get(_params_handles_tailsitter.airspeed_blend_start, &v);
 	_params_tailsitter.airspeed_blend_start = v;
-
-	/* vtol lock elevons in multicopter */
-	param_get(_params_handles_tailsitter.elevons_mc_lock, &l);
-	_params_tailsitter.elevons_mc_lock = l;
 
 	/* avoid parameters which will lead to zero division in the transition code */
 	_params_tailsitter.front_trans_dur = math::max(_params_tailsitter.front_trans_dur, _min_front_trans_dur);
@@ -204,29 +193,24 @@ void Tailsitter::update_vtol_state()
 	switch (_vtol_schedule.flight_mode) {
 	case MC_MODE:
 		_vtol_mode = ROTARY_WING;
-		_vtol_vehicle_status->vtol_in_trans_mode = false;
 		_flag_was_in_trans_mode = false;
 		break;
 
 	case FW_MODE:
 		_vtol_mode = FIXED_WING;
-		_vtol_vehicle_status->vtol_in_trans_mode = false;
 		_flag_was_in_trans_mode = false;
 		break;
 
 	case TRANSITION_FRONT_P1:
 		_vtol_mode = TRANSITION_TO_FW;
-		_vtol_vehicle_status->vtol_in_trans_mode = true;
 		break;
 
 	case TRANSITION_FRONT_P2:
 		_vtol_mode = TRANSITION_TO_FW;
-		_vtol_vehicle_status->vtol_in_trans_mode = true;
 		break;
 
 	case TRANSITION_BACK:
 		_vtol_mode = TRANSITION_TO_MC;
-		_vtol_vehicle_status->vtol_in_trans_mode = true;
 		break;
 	}
 }
@@ -383,13 +367,9 @@ void Tailsitter::scale_mc_output()
 	calc_tot_airspeed();	// estimate air velocity seen by elevons
 
 	// if airspeed is not updating, we assume the normal average speed
-	if (bool nonfinite = !PX4_ISFINITE(_airspeed->indicated_airspeed_m_s) ||
-			     hrt_elapsed_time(&_airspeed->timestamp) > 1e6) {
+	if (!PX4_ISFINITE(_airspeed->indicated_airspeed_m_s) ||
+	    hrt_elapsed_time(&_airspeed->timestamp) > 1e6) {
 		airspeed = _params->mc_airspeed_trim;
-
-		if (nonfinite) {
-			perf_count(_nonfinite_input_perf);
-		}
 
 	} else {
 		airspeed = _airspeed_tot;
@@ -448,7 +428,7 @@ void Tailsitter::fill_actuator_outputs()
 
 		_actuators_out_1->timestamp = _actuators_mc_in->timestamp;
 
-		if (_params->elevons_mc_lock == 1) {
+		if (_params->elevons_mc_lock) {
 			_actuators_out_1->control[0] = 0;
 			_actuators_out_1->control[1] = 0;
 
@@ -503,10 +483,6 @@ void Tailsitter::fill_actuator_outputs()
 		// **LATER** + (_actuators_fw_in->control[actuator_controls_s::INDEX_PITCH] + _params->fw_pitch_trim) *(1 - _mc_pitch_weight);
 		_actuators_out_1->control[actuator_controls_s::INDEX_THROTTLE] =
 			_actuators_fw_in->control[actuator_controls_s::INDEX_THROTTLE];
-		break;
-
-	case EXTERNAL:
-		// not yet implemented, we are switching brute force at the moment
 		break;
 	}
 }

@@ -66,17 +66,13 @@ Tiltrotor::Tiltrotor(VtolAttitudeControl *attc) :
 	_params_handles_tiltrotor.tilt_fw = param_find("VT_TILT_FW");
 	_params_handles_tiltrotor.airspeed_trans = param_find("VT_ARSP_TRANS");
 	_params_handles_tiltrotor.airspeed_blend_start = param_find("VT_ARSP_BLEND");
-	_params_handles_tiltrotor.elevons_mc_lock = param_find("VT_ELEV_MC_LOCK");
 	_params_handles_tiltrotor.front_trans_dur_p2 = param_find("VT_TRANS_P2_DUR");
 	_params_handles_tiltrotor.fw_motors_off = param_find("VT_FW_MOT_OFFID");
 	_params_handles_tiltrotor.airspeed_disabled = param_find("FW_ARSP_MODE");
 	_params_handles_tiltrotor.diff_thrust = param_find("VT_FW_DIFTHR_EN");
 	_params_handles_tiltrotor.diff_thrust_scale = param_find("VT_FW_DIFTHR_SC");
-}
 
-Tiltrotor::~Tiltrotor()
-{
-
+	set_idle_mc();
 }
 
 void
@@ -116,10 +112,6 @@ Tiltrotor::parameters_update()
 	/* vtol airspeed at which we start blending mc/fw controls */
 	param_get(_params_handles_tiltrotor.airspeed_blend_start, &v);
 	_params_tiltrotor.airspeed_blend_start = v;
-
-	/* vtol lock elevons in multicopter */
-	param_get(_params_handles_tiltrotor.elevons_mc_lock, &l);
-	_params_tiltrotor.elevons_mc_lock = l;
 
 	/* vtol front transition phase 2 duration */
 	param_get(_params_handles_tiltrotor.front_trans_dur_p2, &v);
@@ -484,8 +476,6 @@ void Tiltrotor::set_rear_motor_state(rear_motor_state state, int value)
 		break;
 	}
 
-	int ret;
-	unsigned servo_count;
 	const char *dev = PWM_OUTPUT0_DEVICE_PATH;
 	int fd = px4_open(dev, 0);
 
@@ -493,9 +483,7 @@ void Tiltrotor::set_rear_motor_state(rear_motor_state state, int value)
 		PX4_WARN("can't open %s", dev);
 	}
 
-	ret = px4_ioctl(fd, PWM_SERVO_GET_COUNT, (unsigned long)&servo_count);
-	struct pwm_output_values pwm_max_values;
-	memset(&pwm_max_values, 0, sizeof(pwm_max_values));
+	struct pwm_output_values pwm_max_values = {};
 
 	for (int i = 0; i < _params->vtol_motor_count; i++) {
 		if (is_motor_off_channel(i)) {
@@ -508,10 +496,10 @@ void Tiltrotor::set_rear_motor_state(rear_motor_state state, int value)
 		pwm_max_values.channel_count = _params->vtol_motor_count;
 	}
 
-	ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&pwm_max_values);
+	int ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&pwm_max_values);
 
 	if (ret != OK) {
-		PX4_WARN("failed setting max values");
+		PX4_ERR("failed setting max values");
 	}
 
 	px4_close(fd);

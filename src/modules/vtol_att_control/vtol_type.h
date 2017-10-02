@@ -45,11 +45,13 @@
 
 #include <lib/mathlib/mathlib.h>
 #include <drivers/drv_hrt.h>
+#include <drivers/drv_pwm_output.h>
+#include <uORB/topics/vtol_vehicle_status.h>
 
 struct Params {
-	int idle_pwm_mc;			// pwm value for idle in mc mode
-	int vtol_motor_count;		// number of motors
-	int vtol_fw_permanent_stab;	// in fw mode stabilize attitude also in manual mode
+	int32_t idle_pwm_mc;			// pwm value for idle in mc mode
+	int32_t vtol_motor_count;		// number of motors
+	int32_t vtol_fw_permanent_stab;	// in fw mode stabilize attitude also in manual mode
 	float mc_airspeed_min;		// min airspeed in multicoper mode (including prop-wash)
 	float mc_airspeed_trim;		// trim airspeed in multicopter mode
 	float mc_airspeed_max;		// max airpseed in multicopter mode
@@ -57,8 +59,8 @@ struct Params {
 	float power_max;			// maximum power of one engine
 	float prop_eff;				// factor to calculate prop efficiency
 	float arsp_lp_gain;			// total airspeed estimate low pass gain
-	int vtol_type;
-	int elevons_mc_lock;		// lock elevons in multicopter mode
+	int32_t vtol_type;
+	bool elevons_mc_lock;		// lock elevons in multicopter mode
 	float fw_min_alt;			// minimum relative altitude for FW mode (QuadChute)
 	float fw_qc_max_pitch;		// maximum pitch angle FW mode (QuadChute)
 	float fw_qc_max_roll;		// maximum roll angle FW mode (QuadChute)
@@ -68,11 +70,10 @@ struct Params {
 
 // Has to match 1:1 msg/vtol_vehicle_status.msg
 enum mode {
-	TRANSITION_TO_FW = 1,
-	TRANSITION_TO_MC = 2,
-	ROTARY_WING = 3,
-	FIXED_WING = 4,
-	EXTERNAL = 5
+	TRANSITION_TO_FW = vtol_vehicle_status_s::VEHICLE_VTOL_STATE_TRANSITION_TO_FW,
+	TRANSITION_TO_MC = vtol_vehicle_status_s::VEHICLE_VTOL_STATE_TRANSITION_TO_MC,
+	ROTARY_WING = vtol_vehicle_status_s::VEHICLE_VTOL_STATE_MC,
+	FIXED_WING = vtol_vehicle_status_s::VEHICLE_VTOL_STATE_FW
 };
 
 enum vtol_type {
@@ -91,7 +92,7 @@ public:
 	VtolType(const VtolType &) = delete;
 	VtolType &operator=(const VtolType &) = delete;
 
-	virtual ~VtolType();
+	virtual ~VtolType() = default;
 
 	/**
 	 * Update vtol state.
@@ -112,11 +113,6 @@ public:
 	 * Update fixed wing state.
 	 */
 	virtual void update_fw_state();
-
-	/**
-	 * Update external state.
-	 */
-	virtual void update_external_state() {}
 
 	/**
 	 * Write control values to actuator output topics.
@@ -164,7 +160,6 @@ protected:
 	struct actuator_controls_s			*_actuators_out_1;			//actuator controls going to the fw mixer (used for elevons)
 	struct actuator_controls_s			*_actuators_mc_in;			//actuator controls from mc_att_control
 	struct actuator_controls_s			*_actuators_fw_in;			//actuator controls from fw_att_control
-	struct actuator_armed_s				*_armed;					//actuator arming status
 	struct vehicle_local_position_s			*_local_pos;
 	struct airspeed_s 				*_airspeed;					// airspeed
 	struct battery_status_s 			*_batt_status; 				// battery status
@@ -187,6 +182,11 @@ protected:
 	hrt_abstime _trans_finished_ts = 0;
 	bool _tecs_running = false;
 	hrt_abstime _tecs_running_ts = 0;
+
+	struct pwm_output_values _max_mc_pwm_values {};
+
+	bool enable_mc_motors();
+	bool disable_mc_motors();
 
 };
 
