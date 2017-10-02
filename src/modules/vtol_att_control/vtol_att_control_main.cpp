@@ -77,7 +77,6 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	_local_pos_sub(-1),
 	_pos_sp_triplet_sub(-1),
 	_airspeed_sub(-1),
-	_battery_status_sub(-1),
 	_vehicle_cmd_sub(-1),
 	_tecs_status_sub(-1),
 	_land_detected_sub(-1),
@@ -110,7 +109,6 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	memset(&_local_pos, 0, sizeof(_local_pos));
 	memset(&_pos_sp_triplet, 0, sizeof(_pos_sp_triplet));
 	memset(&_airspeed, 0, sizeof(_airspeed));
-	memset(&_batt_status, 0, sizeof(_batt_status));
 	memset(&_vehicle_cmd, 0, sizeof(_vehicle_cmd));
 	memset(&_tecs_status, 0, sizeof(_tecs_status));
 	memset(&_land_detected, 0, sizeof(_land_detected));
@@ -122,13 +120,7 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	_params_handles.idle_pwm_mc = param_find("VT_IDLE_PWM_MC");
 	_params_handles.vtol_motor_count = param_find("VT_MOT_COUNT");
 	_params_handles.vtol_fw_permanent_stab = param_find("VT_FW_PERM_STAB");
-	_params_handles.mc_airspeed_min = param_find("VT_MC_ARSPD_MIN");
-	_params_handles.mc_airspeed_max = param_find("VT_MC_ARSPD_MAX");
-	_params_handles.mc_airspeed_trim = param_find("VT_MC_ARSPD_TRIM");
 	_params_handles.fw_pitch_trim = param_find("VT_FW_PITCH_TRIM");
-	_params_handles.power_max = param_find("VT_POWER_MAX");
-	_params_handles.prop_eff = param_find("VT_PROP_EFF");
-	_params_handles.arsp_lp_gain = param_find("VT_ARSP_LP_GAIN");
 	_params_handles.vtol_type = param_find("VT_TYPE");
 	_params_handles.elevons_mc_lock = param_find("VT_ELEV_MC_LOCK");
 	_params_handles.fw_min_alt = param_find("VT_FW_MIN_ALT");
@@ -309,20 +301,6 @@ VtolAttitudeControl::vehicle_attitude_poll()
 
 	if (updated) {
 		orb_copy(ORB_ID(vehicle_attitude), _v_att_sub, &_v_att);
-	}
-}
-
-/**
-* Check for battery updates.
-*/
-void
-VtolAttitudeControl::vehicle_battery_poll()
-{
-	bool updated;
-	orb_check(_battery_status_sub, &updated);
-
-	if (updated) {
-		orb_copy(ORB_ID(battery_status), _battery_status_sub, &_batt_status);
 	}
 }
 
@@ -517,7 +495,7 @@ VtolAttitudeControl::abort_front_transition(const char *reason)
 /**
 * Update parameters.
 */
-int
+void
 VtolAttitudeControl::parameters_update()
 {
 	float v;
@@ -531,33 +509,9 @@ VtolAttitudeControl::parameters_update()
 	/* vtol fw permanent stabilization */
 	param_get(_params_handles.vtol_fw_permanent_stab, &_params.vtol_fw_permanent_stab);
 
-	/* vtol mc mode min airspeed */
-	param_get(_params_handles.mc_airspeed_min, &v);
-	_params.mc_airspeed_min = v;
-
-	/* vtol mc mode max airspeed */
-	param_get(_params_handles.mc_airspeed_max, &v);
-	_params.mc_airspeed_max = v;
-
-	/* vtol mc mode trim airspeed */
-	param_get(_params_handles.mc_airspeed_trim, &v);
-	_params.mc_airspeed_trim = v;
-
 	/* vtol pitch trim for fw mode */
 	param_get(_params_handles.fw_pitch_trim, &v);
 	_params.fw_pitch_trim = v;
-
-	/* vtol maximum power engine can produce */
-	param_get(_params_handles.power_max, &v);
-	_params.power_max = v;
-
-	/* vtol propeller efficiency factor */
-	param_get(_params_handles.prop_eff, &v);
-	_params.prop_eff = v;
-
-	/* vtol total airspeed estimate low pass gain */
-	param_get(_params_handles.arsp_lp_gain, &v);
-	_params.arsp_lp_gain = v;
 
 	param_get(_params_handles.vtol_type, &l);
 	_params.vtol_type = l;
@@ -589,12 +543,12 @@ VtolAttitudeControl::parameters_update()
 	_params.front_trans_time_min = math::min(_params.front_trans_time_openloop * 0.9f,
 				       _params.front_trans_time_min);
 
+	_vtol_vehicle_status.fw_permanent_stab = (_params.vtol_fw_permanent_stab == 1);
+
 	// update the parameters of the instances of base VtolType
 	if (_vtol_type != nullptr) {
 		_vtol_type->parameters_update();
 	}
-
-	return OK;
 }
 
 /**
@@ -655,7 +609,6 @@ void VtolAttitudeControl::task_main()
 	_local_pos_sub         = orb_subscribe(ORB_ID(vehicle_local_position));
 	_pos_sp_triplet_sub    = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_airspeed_sub          = orb_subscribe(ORB_ID(airspeed));
-	_battery_status_sub	   = orb_subscribe(ORB_ID(battery_status));
 	_vehicle_cmd_sub	   = orb_subscribe(ORB_ID(vehicle_command));
 	_tecs_status_sub = orb_subscribe(ORB_ID(tecs_status));
 	_land_detected_sub = orb_subscribe(ORB_ID(vehicle_land_detected));
@@ -711,21 +664,6 @@ void VtolAttitudeControl::task_main()
 			orb_copy(ORB_ID(actuator_controls_virtual_fw), _actuator_inputs_fw, &_actuators_fw_in);
 		}
 
-		/* only update parameters if they changed */
-		bool params_updated = false;
-		orb_check(_params_sub, &params_updated);
-
-		if (params_updated) {
-			/* read from param to clear updated flag */
-			parameter_update_s update;
-			orb_copy(ORB_ID(parameter_update), _params_sub, &update);
-
-			/* update parameters from storage */
-			parameters_update();
-		}
-
-		_vtol_vehicle_status.fw_permanent_stab = (_params.vtol_fw_permanent_stab == 1);
-
 		mc_virtual_att_sp_poll();
 		fw_virtual_att_sp_poll();
 		vehicle_control_mode_poll();	//Check for changes in vehicle control mode.
@@ -740,7 +678,6 @@ void VtolAttitudeControl::task_main()
 		vehicle_local_pos_poll();			// Check for new sensor values
 		pos_sp_triplet_poll();
 		vehicle_airspeed_poll();
-		vehicle_battery_poll();
 		vehicle_cmd_poll();
 		tecs_status_poll();
 		land_detected_poll();

@@ -52,13 +52,7 @@ struct Params {
 	int32_t idle_pwm_mc;			// pwm value for idle in mc mode
 	int32_t vtol_motor_count;		// number of motors
 	int32_t vtol_fw_permanent_stab;	// in fw mode stabilize attitude also in manual mode
-	float mc_airspeed_min;		// min airspeed in multicoper mode (including prop-wash)
-	float mc_airspeed_trim;		// trim airspeed in multicopter mode
-	float mc_airspeed_max;		// max airpseed in multicopter mode
 	float fw_pitch_trim;		// trim for neutral elevon position in fw mode
-	float power_max;			// maximum power of one engine
-	float prop_eff;				// factor to calculate prop efficiency
-	float arsp_lp_gain;			// total airspeed estimate low pass gain
 	int32_t vtol_type;
 	bool elevons_mc_lock;		// lock elevons in multicopter mode
 	float fw_min_alt;			// minimum relative altitude for FW mode (QuadChute)
@@ -150,10 +144,6 @@ protected:
 	struct vehicle_attitude_setpoint_s	*_v_att_sp;			//vehicle attitude setpoint
 	struct vehicle_attitude_setpoint_s *_mc_virtual_att_sp;	// virtual mc attitude setpoint
 	struct vehicle_attitude_setpoint_s *_fw_virtual_att_sp;	// virtual fw attitude setpoint
-	struct vehicle_rates_setpoint_s 	*_v_rates_sp;		//vehicle rates setpoint
-	struct vehicle_rates_setpoint_s 	*_mc_virtual_v_rates_sp;		// virtual mc vehicle rates setpoint
-	struct vehicle_rates_setpoint_s 	*_fw_virtual_v_rates_sp;		// virtual fw vehicle rates setpoint
-	struct manual_control_setpoint_s	*_manual_control_sp; //manual control setpoint
 	struct vehicle_control_mode_s		*_v_control_mode;	//vehicle control mode
 	struct vtol_vehicle_status_s 		*_vtol_vehicle_status;
 	struct actuator_controls_s			*_actuators_out_0;			//actuator controls going to the mc mixer
@@ -162,8 +152,6 @@ protected:
 	struct actuator_controls_s			*_actuators_fw_in;			//actuator controls from fw_att_control
 	struct vehicle_local_position_s			*_local_pos;
 	struct airspeed_s 				*_airspeed;					// airspeed
-	struct battery_status_s 			*_batt_status; 				// battery status
-	struct tecs_status_s				*_tecs_status;
 	struct vehicle_land_detected_s			*_land_detected;
 
 	struct Params 					*_params;

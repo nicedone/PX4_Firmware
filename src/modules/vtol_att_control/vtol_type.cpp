@@ -54,10 +54,6 @@ VtolType::VtolType(VtolAttitudeControl *att_controller) :
 	_v_att_sp = _attc->get_att_sp();
 	_mc_virtual_att_sp = _attc->get_mc_virtual_att_sp();
 	_fw_virtual_att_sp = _attc->get_fw_virtual_att_sp();
-	_v_rates_sp = _attc->get_rates_sp();
-	_mc_virtual_v_rates_sp = _attc->get_mc_virtual_rates_sp();
-	_fw_virtual_v_rates_sp = _attc->get_fw_virtual_rates_sp();
-	_manual_control_sp = _attc->get_manual_control_sp();
 	_v_control_mode = _attc->get_control_mode();
 	_vtol_vehicle_status = _attc->get_vtol_vehicle_status();
 	_actuators_out_0 = _attc->get_actuators_out0();
@@ -66,8 +62,6 @@ VtolType::VtolType(VtolAttitudeControl *att_controller) :
 	_actuators_fw_in = _attc->get_actuators_fw_in();
 	_local_pos = _attc->get_local_pos();
 	_airspeed = _attc->get_airspeed();
-	_batt_status = _attc->get_batt_status();
-	_tecs_status = _attc->get_tecs_status();
 	_land_detected = _attc->get_land_detected();
 	_params = _attc->get_params();
 
@@ -86,18 +80,15 @@ void VtolType::set_idle_mc()
 		PX4_WARN("can't open %s", dev);
 	}
 
-	unsigned servo_count;
-	int ret = px4_ioctl(fd, PWM_SERVO_GET_COUNT, (unsigned long)&servo_count);
 	unsigned pwm_value = _params->idle_pwm_mc;
-	struct pwm_output_values pwm_values;
-	memset(&pwm_values, 0, sizeof(pwm_values));
+	struct pwm_output_values pwm_values = {};
 
 	for (int i = 0; i < _params->vtol_motor_count; i++) {
 		pwm_values.values[i] = pwm_value;
 		pwm_values.channel_count++;
 	}
 
-	ret = px4_ioctl(fd, PWM_SERVO_SET_MIN_PWM, (long unsigned int)&pwm_values);
+	int ret = px4_ioctl(fd, PWM_SERVO_SET_MIN_PWM, (long unsigned int)&pwm_values);
 
 	if (ret != OK) {
 		PX4_WARN("failed setting min values");
@@ -159,7 +150,7 @@ void VtolType::update_fw_state()
 	_mc_yaw_weight = 0.0f;
 
 	// tecs didn't publish an update yet after the transition
-	if (_tecs_status->timestamp < _trans_finished_ts) {
+	if (_attc->get_tecs_status()->timestamp < _trans_finished_ts) {
 		_tecs_running = false;
 
 	} else if (!_tecs_running) {

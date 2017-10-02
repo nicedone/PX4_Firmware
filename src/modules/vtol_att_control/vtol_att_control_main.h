@@ -65,7 +65,6 @@
 
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/airspeed.h>
-#include <uORB/topics/battery_status.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/tecs_status.h>
@@ -103,10 +102,6 @@ public:
 	struct vehicle_attitude_setpoint_s		*get_att_sp() {return &_v_att_sp;}
 	struct vehicle_attitude_setpoint_s 		*get_mc_virtual_att_sp() {return &_mc_virtual_att_sp;}
 	struct vehicle_attitude_setpoint_s 		*get_fw_virtual_att_sp() {return &_fw_virtual_att_sp;}
-	struct vehicle_rates_setpoint_s 		*get_rates_sp() {return &_v_rates_sp;}
-	struct vehicle_rates_setpoint_s 		*get_mc_virtual_rates_sp() {return &_mc_virtual_v_rates_sp;}
-	struct vehicle_rates_setpoint_s 		*get_fw_virtual_rates_sp() {return &_fw_virtual_v_rates_sp;}
-	struct manual_control_setpoint_s 		*get_manual_control_sp() {return &_manual_control_sp;}
 	struct vehicle_control_mode_s 			*get_control_mode() {return &_v_control_mode;}
 	struct vtol_vehicle_status_s			*get_vtol_vehicle_status() {return &_vtol_vehicle_status;}
 	struct actuator_controls_s 			*get_actuators_out0() {return &_actuators_out_0;}
@@ -116,7 +111,6 @@ public:
 	struct vehicle_local_position_s 		*get_local_pos() {return &_local_pos;}
 	struct position_setpoint_triplet_s		*get_pos_sp_triplet() {return &_pos_sp_triplet;}
 	struct airspeed_s 				*get_airspeed() {return &_airspeed;}
-	struct battery_status_s 			*get_batt_status() {return &_batt_status;}
 	struct tecs_status_s 				*get_tecs_status() {return &_tecs_status;}
 	struct vehicle_land_detected_s			*get_land_detected() {return &_land_detected;}
 
@@ -142,7 +136,6 @@ private:
 	int	_local_pos_sub;			// sensor subscription
 	int	_pos_sp_triplet_sub;			// local position setpoint subscription
 	int	_airspeed_sub;			// airspeed subscription
-	int	_battery_status_sub;	// battery status subscription
 	int	_vehicle_cmd_sub;
 	int	_tecs_status_sub;
 	int	_land_detected_sub;
@@ -175,7 +168,6 @@ private:
 	struct vehicle_local_position_s			_local_pos;
 	struct position_setpoint_triplet_s		_pos_sp_triplet;
 	struct airspeed_s 				_airspeed;			// airspeed
-	struct battery_status_s 			_batt_status; 		// battery status
 	struct vehicle_command_s			_vehicle_cmd;
 	struct tecs_status_s				_tecs_status;
 	struct vehicle_land_detected_s			_land_detected;
@@ -186,13 +178,7 @@ private:
 		param_t idle_pwm_mc;
 		param_t vtol_motor_count;
 		param_t vtol_fw_permanent_stab;
-		param_t mc_airspeed_min;
-		param_t mc_airspeed_trim;
-		param_t mc_airspeed_max;
 		param_t fw_pitch_trim;
-		param_t power_max;
-		param_t prop_eff;
-		param_t arsp_lp_gain;
 		param_t vtol_type;
 		param_t elevons_mc_lock;
 		param_t fw_min_alt;
@@ -228,13 +214,12 @@ private:
 	void 		vehicle_airspeed_poll();		// Check for changes in airspeed
 	void		vehicle_attitude_setpoint_poll();  //Check for attitude setpoint updates.
 	void		vehicle_attitude_poll();  //Check for attitude updates.
-	void 		vehicle_battery_poll();			// Check for battery updates
 	void		vehicle_cmd_poll();
 	void		tecs_status_poll();
 	void		land_detected_poll();
 	void 		parameters_update_poll();		//Check if parameters have changed
 
-	int 		parameters_update();			//Update local paraemter cache
+	void 		parameters_update();			//Update local paraemter cache
 
 	void 		fill_mc_att_rates_sp();
 	void 		fill_fw_att_rates_sp();
