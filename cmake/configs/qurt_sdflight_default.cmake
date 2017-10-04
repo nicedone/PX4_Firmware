@@ -32,6 +32,7 @@ set(config_module_list
 	#
 	# Board support modules
 	#
+	drivers/boards
 	drivers/device
 	modules/sensors
 	platforms/posix/drivers/df_mpu9250_wrapper
