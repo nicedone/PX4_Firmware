@@ -31,7 +31,7 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE drivers__boards__sitl
+	MODULE drivers__boards__eagle
 	COMPILE_FLAGS
 	SRCS
 		sitl_led.c
