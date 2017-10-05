@@ -146,24 +146,22 @@ set(config_module_list
 	# Libraries
 	#
 	lib/controllib
-	lib/conversion
-	lib/DriverFramework/framework
+	lib/mathlib
+	lib/mathlib/math/filter
+	lib/rc
 	lib/ecl
 	lib/external_lgpl
 	lib/geo
 	lib/geo_lookup
+	lib/conversion
 	lib/launchdetection
 	lib/led
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
+	lib/terrain_estimation
 	lib/runway_takeoff
 	lib/tailsitter_recovery
-	lib/terrain_estimation
 	lib/version
 	lib/DriverFramework/framework
 	lib/micro-CDR
-	lib/wind_estimator
 
 	#
 	# Platform
