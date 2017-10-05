@@ -78,18 +78,27 @@ set(config_module_list
 	# Libraries
 	#
 	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
+	lib/conversion
+	lib/DriverFramework/framework
 	lib/ecl
 	lib/geo
 	lib/geo_lookup
 	lib/conversion
+	lib/launchdetection
+	lib/mathlib
+	lib/mathlib/math/filter
+	lib/rc
+	lib/runway_takeoff
 	lib/tailsitter_recovery
+	lib/terrain_estimation
 	lib/version
 	lib/DriverFramework/framework
 	lib/rc
 	platforms/nuttx
 	lib/micro-CDR
+	lib/wind_estimator
+
 	platforms/common
+	platforms/nuttx
 	platforms/nuttx/px4_layer
 )

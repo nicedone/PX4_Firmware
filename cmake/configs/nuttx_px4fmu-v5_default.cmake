@@ -162,6 +162,7 @@ set(config_module_list
 	lib/terrain_estimation
 	lib/version
 	lib/micro-CDR
+	lib/wind_estimator
 
 	#
 	# Platform

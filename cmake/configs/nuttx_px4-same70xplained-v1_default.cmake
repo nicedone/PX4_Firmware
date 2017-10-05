@@ -118,11 +118,12 @@ set(config_module_list
 	lib/mathlib
 	lib/mathlib/math/filter
 	lib/rc
+	lib/conversion
+	lib/DriverFramework/framework
 	lib/ecl
 	lib/external_lgpl
 	lib/geo
 	lib/geo_lookup
-	lib/conversion
 	lib/led
 	lib/DriverFramework/framework
 	lib/launchdetection
@@ -131,9 +132,19 @@ set(config_module_list
 	lib/runway_takeoff
 	lib/tailsitter_recovery
 	platforms/nuttx
+	lib/launchdetection
+	lib/led
+	lib/mathlib
+	lib/mathlib/math/filter
+	lib/runway_takeoff
+	lib/tailsitter_recovery
+	lib/terrain_estimation
+	lib/version
+	lib/wind_estimator
 
 	# had to add for cmake, not sure why wasn't in original config
 	platforms/common
+	platforms/nuttx
 	platforms/nuttx/px4_layer
 	lib/micro-CDR
 
