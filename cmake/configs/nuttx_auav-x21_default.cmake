@@ -150,6 +150,7 @@ set(config_module_list
 	lib/DriverFramework/framework
 	platforms/nuttx
 	lib/micro-CDR
+	lib/wind_estimator
 
 	# had to add for cmake, not sure why wasn't in original config
 	platforms/common

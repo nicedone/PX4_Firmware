@@ -92,4 +92,6 @@ set(config_module_list
 	lib/micro-CDR
 	platforms/common
 	platforms/nuttx/px4_layer
+	lib/wind_estimator
+
 )
