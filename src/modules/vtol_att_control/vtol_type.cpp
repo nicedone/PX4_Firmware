@@ -40,6 +40,7 @@
 */
 
 #include "vtol_type.h"
+
 #include "vtol_att_control_main.h"
 
 #include <cfloat>
@@ -47,15 +48,33 @@
 #include <matrix/math.hpp>
 
 VtolType::VtolType(VtolAttitudeControl *att_controller) :
+	SuperBlock(nullptr, "VT"),
 	_attc(att_controller),
-	_vtol_mode(ROTARY_WING)
+	_vtol_mode(ROTARY_WING),
+	_param_idle_pwm_mc(this, "IDLE_PWM_MC"),
+	_param_vtol_motor_count(this, "MOT_COUNT"),
+	_param_fw_pitch_trim(this, "FW_PITCH_TRIM"),
+	_param_elevons_mc_lock(this, "ELEV_MC_LOCK"),
+	_param_front_trans_dur(this, "F_TRANS_DUR"),
+	_param_front_trans_time_min(this, "TRANS_MIN_TM"),
+	_param_airspeed_blend_start(this, "ARSP_BLEND"),
+	_param_airspeed_trans(this, "ARSP_TRANS"),
+	_param_back_trans_dur(this, "VT_B_TRANS_DUR"),
+	_param_qc_fw_min_alt(this, "FW_MIN_ALT"),
+	_param_qc_fw_max_pitch(this, "FW_QC_P"),
+	_param_qc_fw_max_roll(this, "FW_QC_R"),
+	_param_airspeed_mode(this, "FW_AIRSPD_MODE, false")
 {
+
+	for (auto &pwm_max : _max_mc_pwm_values.values) {
+		pwm_max = PWM_DEFAULT_MAX;
+	}
+
 	_v_att = _attc->get_att();
 	_v_att_sp = _attc->get_att_sp();
 	_mc_virtual_att_sp = _attc->get_mc_virtual_att_sp();
 	_fw_virtual_att_sp = _attc->get_fw_virtual_att_sp();
 	_v_control_mode = _attc->get_control_mode();
-	_vtol_vehicle_status = _attc->get_vtol_vehicle_status();
 	_actuators_out_0 = _attc->get_actuators_out0();
 	_actuators_out_1 = _attc->get_actuators_out1();
 	_actuators_mc_in = _attc->get_actuators_mc_in();
@@ -63,71 +82,8 @@ VtolType::VtolType(VtolAttitudeControl *att_controller) :
 	_local_pos = _attc->get_local_pos();
 	_airspeed = _attc->get_airspeed();
 	_land_detected = _attc->get_land_detected();
-	_params = _attc->get_params();
 
-	flag_idle_mc = true;
-}
-
-/**
-* Adjust idle speed for mc mode.
-*/
-void VtolType::set_idle_mc()
-{
-	const char *dev = PWM_OUTPUT0_DEVICE_PATH;
-	int fd = px4_open(dev, 0);
-
-	if (fd < 0) {
-		PX4_WARN("can't open %s", dev);
-	}
-
-	unsigned pwm_value = _params->idle_pwm_mc;
-	struct pwm_output_values pwm_values = {};
-
-	for (int i = 0; i < _params->vtol_motor_count; i++) {
-		pwm_values.values[i] = pwm_value;
-		pwm_values.channel_count++;
-	}
-
-	int ret = px4_ioctl(fd, PWM_SERVO_SET_MIN_PWM, (long unsigned int)&pwm_values);
-
-	if (ret != OK) {
-		PX4_WARN("failed setting min values");
-	}
-
-	px4_close(fd);
-
-	flag_idle_mc = true;
-}
-
-/**
-* Adjust idle speed for fw mode.
-*/
-void VtolType::set_idle_fw()
-{
-	const char *dev = PWM_OUTPUT0_DEVICE_PATH;
-	int fd = px4_open(dev, 0);
-
-	if (fd < 0) {
-		PX4_WARN("can't open %s", dev);
-	}
-
-	struct pwm_output_values pwm_values;
-
-	memset(&pwm_values, 0, sizeof(pwm_values));
-
-	for (int i = 0; i < _params->vtol_motor_count; i++) {
-
-		pwm_values.values[i] = PWM_MOTOR_OFF;
-		pwm_values.channel_count++;
-	}
-
-	int ret = px4_ioctl(fd, PWM_SERVO_SET_MIN_PWM, (long unsigned int)&pwm_values);
-
-	if (ret != OK) {
-		PX4_WARN("failed setting min values");
-	}
-
-	px4_close(fd);
+	updateParams();
 }
 
 void VtolType::update_mc_state()
@@ -186,25 +142,22 @@ void VtolType::check_quadchute_condition()
 		matrix::Eulerf euler = matrix::Quatf(_v_att->q);
 
 		// fixed-wing minimum altitude
-		if (_params->fw_min_alt > FLT_EPSILON) {
-
-			if (-(_local_pos->z) < _params->fw_min_alt) {
+		if (_param_qc_fw_min_alt.get() > FLT_EPSILON) {
+			if (-(_local_pos->z) < _param_qc_fw_min_alt.get()) {
 				_attc->abort_front_transition("Minimum altitude breached");
 			}
 		}
 
 		// fixed-wing maximum pitch angle
-		if (_params->fw_qc_max_pitch > 0) {
-
-			if (fabsf(euler.theta()) > fabsf(math::radians(_params->fw_qc_max_pitch))) {
+		if (_param_qc_fw_max_pitch.get() > 0) {
+			if (fabsf(math::degrees(euler.theta())) > _param_qc_fw_max_pitch.get()) {
 				_attc->abort_front_transition("Maximum pitch angle exceeded");
 			}
 		}
 
 		// fixed-wing maximum roll angle
-		if (_params->fw_qc_max_roll > 0) {
-
-			if (fabsf(euler.phi()) > fabsf(math::radians(_params->fw_qc_max_roll))) {
+		if (_param_qc_fw_max_roll.get() > 0) {
+			if (fabsf(math::degrees(euler.phi())) > _param_qc_fw_max_roll.get()) {
 				_attc->abort_front_transition("Maximum roll angle exceeded");
 			}
 		}
@@ -243,9 +196,9 @@ VtolType::disable_mc_motors()
 	if (ret == OK) {
 
 		// finally disable by setting the MC motors max to the disarmed value
-		for (int i = 0; i < _params->vtol_motor_count; i++) {
+		for (int i = 0; i < _param_vtol_motor_count.get(); i++) {
 			max_pwm_values.values[i] = disarmed_pwm_values.values[i];
-			max_pwm_values.channel_count = _params->vtol_motor_count;
+			max_pwm_values.channel_count = _param_vtol_motor_count.get();
 		}
 
 		ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&max_pwm_values);
@@ -276,9 +229,9 @@ VtolType::enable_mc_motors()
 
 	struct pwm_output_values pwm_values = {};
 
-	for (int i = 0; i < _params->vtol_motor_count; i++) {
+	for (int i = 0; i < _param_vtol_motor_count.get(); i++) {
 		pwm_values.values[i] = _max_mc_pwm_values.values[i];
-		pwm_values.channel_count = _params->vtol_motor_count;
+		pwm_values.channel_count = _param_vtol_motor_count.get();
 	}
 
 	int ret = px4_ioctl(fd, PWM_SERVO_SET_MAX_PWM, (long unsigned int)&pwm_values);

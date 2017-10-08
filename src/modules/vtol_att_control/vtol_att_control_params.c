@@ -203,20 +203,6 @@ PARAM_DEFINE_INT32(VT_OPT_RECOV_EN, 0);
 PARAM_DEFINE_FLOAT(VT_WV_YAWR_SCL, 0.15f);
 
 /**
- * Front transition timeout
- *
- * Time in seconds after which transition will be cancelled. Disabled if set to 0.
- *
- * @unit s
- * @min 0.00
- * @max 30.00
- * @increment 1
- * @decimal 2
- * @group VTOL Attitude Control
- */
-PARAM_DEFINE_FLOAT(VT_TRANS_TIMEOUT, 15.0f);
-
-/**
  * Front transition minimum time
  *
  * Minimum time in seconds for front transition.

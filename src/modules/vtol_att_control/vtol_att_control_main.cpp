@@ -93,6 +93,7 @@ VtolAttitudeControl::VtolAttitudeControl() :
 {
 	memset(& _vtol_vehicle_status, 0, sizeof(_vtol_vehicle_status));
 	_vtol_vehicle_status.vtol_in_rw_mode = true;	/* start vtol in rotary wing mode*/
+
 	memset(&_v_att, 0, sizeof(_v_att));
 	memset(&_v_att_sp, 0, sizeof(_v_att_sp));
 	memset(&_mc_virtual_att_sp, 0, sizeof(_mc_virtual_att_sp));
@@ -113,37 +114,25 @@ VtolAttitudeControl::VtolAttitudeControl() :
 	memset(&_tecs_status, 0, sizeof(_tecs_status));
 	memset(&_land_detected, 0, sizeof(_land_detected));
 
-	_params.idle_pwm_mc = PWM_DEFAULT_MIN;
-	_params.vtol_motor_count = 0;
-	_params.vtol_fw_permanent_stab = 0;
+	int32_t vtol_type_param = -1;
+	param_get(param_find("VT_TYPE"), &vtol_type_param);
 
-	_params_handles.idle_pwm_mc = param_find("VT_IDLE_PWM_MC");
-	_params_handles.vtol_motor_count = param_find("VT_MOT_COUNT");
-	_params_handles.vtol_fw_permanent_stab = param_find("VT_FW_PERM_STAB");
-	_params_handles.fw_pitch_trim = param_find("VT_FW_PITCH_TRIM");
-	_params_handles.vtol_type = param_find("VT_TYPE");
-	_params_handles.elevons_mc_lock = param_find("VT_ELEV_MC_LOCK");
-	_params_handles.fw_min_alt = param_find("VT_FW_MIN_ALT");
-	_params_handles.fw_qc_max_pitch = param_find("VT_FW_QC_P");
-	_params_handles.fw_qc_max_roll = param_find("VT_FW_QC_R");
-	_params_handles.front_trans_time_openloop = param_find("VT_F_TR_OL_TM");
-	_params_handles.front_trans_time_min = param_find("VT_TRANS_MIN_TM");
-
-	/* fetch initial parameter values */
-	parameters_update();
-
-	if (_params.vtol_type == vtol_type::TAILSITTER) {
+	if (vtol_type_param == vtol_type::TAILSITTER) {
 		_vtol_type = new Tailsitter(this);
 
-	} else if (_params.vtol_type == vtol_type::TILTROTOR) {
+	} else if (vtol_type_param == vtol_type::TILTROTOR) {
 		_vtol_type = new Tiltrotor(this);
 
-	} else if (_params.vtol_type == vtol_type::STANDARD) {
+	} else if (vtol_type_param == vtol_type::STANDARD) {
 		_vtol_type = new Standard(this);
 
 	} else {
+		PX4_ERR("invalid vtol_type %d", vtol_type_param);
 		_task_should_exit = true;
 	}
+
+	/* fetch initial parameter values */
+	parameters_update();
 }
 
 /**
@@ -317,11 +306,9 @@ VtolAttitudeControl::parameters_update_poll()
 
 	if (updated) {
 		// only update params if disarmed or landed
-		if (!_v_control_mode.flag_armed || _land_detected.landed) {
-			struct parameter_update_s param_update;
-			orb_copy(ORB_ID(parameter_update), _params_sub, &param_update);
-			parameters_update();
-		}
+		struct parameter_update_s param_update;
+		orb_copy(ORB_ID(parameter_update), _params_sub, &param_update);
+		parameters_update();
 	}
 }
 
@@ -498,52 +485,10 @@ VtolAttitudeControl::abort_front_transition(const char *reason)
 void
 VtolAttitudeControl::parameters_update()
 {
-	float v;
-	int l;
-	/* idle pwm for mc mode */
-	param_get(_params_handles.idle_pwm_mc, &_params.idle_pwm_mc);
-
-	/* vtol motor count */
-	param_get(_params_handles.vtol_motor_count, &_params.vtol_motor_count);
-
 	/* vtol fw permanent stabilization */
-	param_get(_params_handles.vtol_fw_permanent_stab, &_params.vtol_fw_permanent_stab);
-
-	/* vtol pitch trim for fw mode */
-	param_get(_params_handles.fw_pitch_trim, &v);
-	_params.fw_pitch_trim = v;
-
-	param_get(_params_handles.vtol_type, &l);
-	_params.vtol_type = l;
-
-	/* vtol lock elevons in multicopter */
-	param_get(_params_handles.elevons_mc_lock, &l);
-	_params.elevons_mc_lock = (l == 1);
-
-	/* minimum relative altitude for FW mode (QuadChute) */
-	param_get(_params_handles.fw_min_alt, &v);
-	_params.fw_min_alt = v;
-
-	/* maximum pitch angle (QuadChute) */
-	param_get(_params_handles.fw_qc_max_pitch, &l);
-	_params.fw_qc_max_pitch = l;
-
-	/* maximum roll angle (QuadChute) */
-	param_get(_params_handles.fw_qc_max_roll, &l);
-	_params.fw_qc_max_roll = l;
-
-	param_get(_params_handles.front_trans_time_openloop, &_params.front_trans_time_openloop);
-
-	param_get(_params_handles.front_trans_time_min, &_params.front_trans_time_min);
-
-	/*
-	 * Minimum transition time can be maximum 90 percent of the open loop transition time,
-	 * anything else makes no sense and can potentially lead to numerical problems.
-	 */
-	_params.front_trans_time_min = math::min(_params.front_trans_time_openloop * 0.9f,
-				       _params.front_trans_time_min);
-
-	_vtol_vehicle_status.fw_permanent_stab = (_params.vtol_fw_permanent_stab == 1);
+	int32_t vtol_fw_permanent_stab = 0;
+	param_get(_param_vtol_fw_permanent_stab, &vtol_fw_permanent_stab);
+	_vtol_vehicle_status.fw_permanent_stab = (_param_vtol_fw_permanent_stab == 1);
 
 	// update the parameters of the instances of base VtolType
 	if (_vtol_type != nullptr) {
@@ -617,9 +562,6 @@ void VtolAttitudeControl::task_main()
 	_actuator_inputs_fw    = orb_subscribe(ORB_ID(actuator_controls_virtual_fw));
 
 	parameters_update();  // initialize parameter cache
-
-	/* update vtol vehicle status*/
-	_vtol_vehicle_status.fw_permanent_stab = (_params.vtol_fw_permanent_stab == 1);
 
 	/* wakeup source*/
 	px4_pollfd_struct_t fds[2] = {};	/*input_mc, input_fw, parameters*/

@@ -114,8 +114,6 @@ public:
 	struct tecs_status_s 				*get_tecs_status() {return &_tecs_status;}
 	struct vehicle_land_detected_s			*get_land_detected() {return &_land_detected;}
 
-	struct Params 					*get_params() {return &_params;}
-
 private:
 //******************flags & handlers******************************************************
 	bool _task_should_exit;
@@ -172,21 +170,7 @@ private:
 	struct tecs_status_s				_tecs_status;
 	struct vehicle_land_detected_s			_land_detected;
 
-	Params _params;	// struct holding the parameters
-
-	struct {
-		param_t idle_pwm_mc;
-		param_t vtol_motor_count;
-		param_t vtol_fw_permanent_stab;
-		param_t fw_pitch_trim;
-		param_t vtol_type;
-		param_t elevons_mc_lock;
-		param_t fw_min_alt;
-		param_t fw_qc_max_pitch;
-		param_t fw_qc_max_roll;
-		param_t front_trans_time_openloop;
-		param_t front_trans_time_min;
-	} _params_handles{};
+	param_t _param_vtol_fw_permanent_stab{PARAM_INVALID};
 
 	/* for multicopters it is usual to have a non-zero idle speed of the engines
 	 * for fixed wings we want to have an idle speed of zero since we do not want
