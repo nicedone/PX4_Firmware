@@ -18,88 +18,88 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	modules/sensors
-	platforms/posix/drivers/df_mpu9250_wrapper
-	platforms/posix/drivers/df_ms5611_wrapper
-	platforms/posix/drivers/df_hmc5883_wrapper
+	src/drivers/device
+	src/modules/sensors
+	src/platforms/posix/drivers/df_mpu9250_wrapper
+	src/platforms/posix/drivers/df_ms5611_wrapper
+	src/platforms/posix/drivers/df_hmc5883_wrapper
 
 	#
 	# System commands
 	#
-	systemcmds/param
-	systemcmds/mixer
-	systemcmds/ver
-	systemcmds/esc_calib
-	systemcmds/reboot
-	systemcmds/topic_listener
-	systemcmds/perf
+	src/systemcmds/param
+	src/systemcmds/mixer
+	src/systemcmds/ver
+	src/systemcmds/esc_calib
+	src/systemcmds/reboot
+	src/systemcmds/topic_listener
+	src/systemcmds/perf
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/mc_att_control
-	modules/mc_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
 
 	#
 	# Library modules
 	#
-	modules/sdlog2
-	modules/logger
-	modules/commander
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
-	modules/land_detector
-	modules/navigator
-	modules/mavlink
+	src/modules/sdlog2
+	src/modules/logger
+	src/modules/commander
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
+	src/modules/land_detector
+	src/modules/navigator
+	src/modules/mavlink
 
 	#
 	# PX4 drivers
 	#
-	drivers/gps
-	drivers/ocpoc_adc
-	drivers/ocpoc_sbus_rc_in
-	drivers/linux_pwm_out
-	drivers/rgbled
-	drivers/ulanding
+	src/drivers/gps
+	src/drivers/ocpoc_adc
+	src/drivers/ocpoc_sbus_rc_in
+	src/drivers/linux_pwm_out
+	src/drivers/rgbled
+	src/drivers/ulanding
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/geo
-	lib/ecl
-	lib/geo_lookup
-	lib/launchdetection
-	lib/external_lgpl
-	lib/conversion
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
-	lib/rc
-	lib/led
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/geo
+	src/lib/ecl
+	src/lib/geo_lookup
+	src/lib/launchdetection
+	src/lib/external_lgpl
+	src/lib/conversion
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/lib/rc
+	src/lib/led
 
 	#
 	# POSIX
 	#
-	platforms/common
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
+	src/platforms/common
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
 	
 	examples/px4_simple_app
 )

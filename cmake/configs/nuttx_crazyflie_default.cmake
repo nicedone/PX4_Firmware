@@ -6,52 +6,52 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/led
-	drivers/px4fmu
-	drivers/boards
-	drivers/mpu9250
-	drivers/lps25h
-	drivers/gps
-	modules/sensors
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/boards
+	src/drivers/mpu9250
+	src/drivers/lps25h
+	src/drivers/gps
+	src/modules/sensors
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/mixer
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/esc_calib
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/config
-	systemcmds/nshterm
-	systemcmds/mtd
-	systemcmds/dumpfile
-	systemcmds/ver
-	systemcmds/hardfault_log
+	src/systemcmds/bl_update
+	src/systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/esc_calib
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/nshterm
+	src/systemcmds/mtd
+	src/systemcmds/dumpfile
+	src/systemcmds/ver
+	src/systemcmds/hardfault_log
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/load_mon
-	modules/navigator
-	modules/mavlink
-	#modules/gpio_led
-	modules/land_detector
-	modules/syslink
+	src/modules/commander
+	src/modules/load_mon
+	src/modules/navigator
+	src/modules/mavlink
+	#src/modules/gpio_led
+	src/modules/land_detector
+	src/modules/syslink
 
 	#
 	# Estimation modules (EKF/ SO3 / other filters)
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
@@ -59,52 +59,52 @@ set(config_module_list
 	# modules/segway # XXX Needs GCC 4.7 fix
 	# modules/fw_pos_control_l1
 	# modules/fw_att_control
-	modules/mc_att_control
-	modules/mc_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
 	# modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
+	src/modules/logger
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/launchdetection
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
-	platforms/nuttx
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/rc
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/launchdetection
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 
 	#
 	# OBC challenge
 	#
-	modules/bottle_drop
+	src/modules/bottle_drop
 
 	#
 	# Rover apps

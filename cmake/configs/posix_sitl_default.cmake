@@ -3,28 +3,28 @@ include(posix/px4_impl_posix)
 set(CMAKE_TOOLCHAIN_FILE ${PX4_SOURCE_DIR}/cmake/toolchains/Toolchain-native.cmake)
 
 set(config_module_list
-	drivers/boards
-	drivers/camera_trigger
-	drivers/device
-	drivers/gps
-	drivers/pwm_out_sim
-	drivers/vmount
-	drivers/linux_gpio
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/sdp3x_airspeed
+	src/drivers/boards
+	src/drivers/camera_trigger
+	src/drivers/device
+	src/drivers/gps
+	src/drivers/pwm_out_sim
+	src/drivers/vmount
+	src/drivers/linux_gpio
+	src/drivers/airspeed
+	src/drivers/ets_airspeed
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/sdp3x_airspeed
 
-	modules/sensors
-	platforms/posix/drivers/accelsim
-	platforms/posix/drivers/adcsim
-	platforms/posix/drivers/airspeedsim
-	platforms/posix/drivers/barosim
-	platforms/posix/drivers/gpssim
-	platforms/posix/drivers/gyrosim
-	platforms/posix/drivers/ledsim
-	platforms/posix/drivers/tonealrmsim
+	src/modules/sensors
+	src/platforms/posix/drivers/accelsim
+	src/platforms/posix/drivers/adcsim
+	src/platforms/posix/drivers/airspeedsim
+	src/platforms/posix/drivers/barosim
+	src/platforms/posix/drivers/gpssim
+	src/platforms/posix/drivers/gyrosim
+	src/platforms/posix/drivers/ledsim
+	src/platforms/posix/drivers/tonealrmsim
 
 	#
 	# System commands
@@ -32,122 +32,122 @@ set(config_module_list
 	#systemcmds/bl_update
 	#systemcmds/config
 	#systemcmds/dumpfile
-	systemcmds/esc_calib
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/motor_ramp
+	src/systemcmds/esc_calib
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/motor_ramp
 	#systemcmds/mtd
 	#systemcmds/nshterm
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/reboot
-	systemcmds/sd_bench
-	systemcmds/top
-	systemcmds/topic_listener
-	systemcmds/ver
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/reboot
+	src/systemcmds/sd_bench
+	src/systemcmds/top
+	src/systemcmds/topic_listener
+	src/systemcmds/ver
 
 	#
 	# Testing
 	#
-	drivers/sf0x/sf0x_tests
-	#drivers/test_ppm
-	lib/rc/rc_tests
-	modules/commander/commander_tests
-	lib/controllib/controllib_test
-	modules/mavlink/mavlink_tests
-	modules/mc_pos_control/mc_pos_control_tests
-	modules/uORB/uORB_tests
-	systemcmds/tests
+	src/drivers/sf0x/sf0x_tests
+	#src/drivers/test_ppm
+	src/lib/rc/rc_tests
+	src/modules/commander/commander_tests
+	src/lib/controllib/controllib_test
+	src/modules/mavlink/mavlink_tests
+	src/modules/mc_pos_control/mc_pos_control_tests
+	src/modules/uORB/uORB_tests
+	src/systemcmds/tests
 
-	platforms/posix/tests/hello
-	platforms/posix/tests/hrt_test
-	platforms/posix/tests/muorb
-	platforms/posix/tests/vcdev_test
-	platforms/posix/tests/wqueue
+	src/platforms/posix/tests/hello
+	src/platforms/posix/tests/hrt_test
+	src/platforms/posix/tests/muorb
+	src/platforms/posix/tests/vcdev_test
+	src/platforms/posix/tests/wqueue
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/events
-	#modules/gpio_led
-	modules/land_detector
-	modules/load_mon
-	modules/mavlink
-	modules/navigator
-	modules/replay
-	modules/simulator
-	#modules/uavcan
+	src/modules/commander
+	src/modules/events
+	#src/modules/gpio_led
+	src/modules/land_detector
+	src/modules/load_mon
+	src/modules/mavlink
+	src/modules/navigator
+	src/modules/replay
+	src/modules/simulator
+	#src/modules/uavcan
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/ekf2
-	modules/local_position_estimator
-	modules/position_estimator_inav
+	src/modules/attitude_estimator_q
+	src/modules/ekf2
+	src/modules/local_position_estimator
+	src/modules/position_estimator_inav
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/gnd_att_control
+	src/modules/gnd_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
-	modules/sdlog2
+	src/modules/logger
+	src/modules/sdlog2
 
 	#
 	# Library modules
 	#
-	modules/dataman
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
+	src/modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
 
 	# micro RTPS
-	modules/micrortps_bridge/micrortps_client
+	src/modules/micrortps_bridge/micrortps_client
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/conversion
-	lib/DriverFramework/framework
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/launchdetection
-	lib/led
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/terrain_estimation
-	lib/version
+	src/lib/controllib
+	src/lib/conversion
+	src/lib/DriverFramework/framework
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/rc
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/terrain_estimation
+	src/lib/version
 
 	#
 	# Platform
 	#
-	platforms/common
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
+	src/platforms/common
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
 
 	#
 	# OBC challenge
 	#
-	modules/bottle_drop
+	src/modules/bottle_drop
 
 	#
 	# Rover apps

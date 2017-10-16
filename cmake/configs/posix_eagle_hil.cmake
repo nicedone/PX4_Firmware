@@ -19,39 +19,39 @@ else()
 endif()
 
 set(config_module_list
-	drivers/device
-	drivers/boards
-	drivers/led
-	drivers/linux_sbus
+	src/drivers/device
+	src/drivers/boards
+	src/drivers/led
+	src/drivers/linux_sbus
 
-	systemcmds/param
-	systemcmds/ver
+	src/systemcmds/param
+	src/systemcmds/ver
 
-	modules/mavlink
+	src/modules/mavlink
 
-	modules/systemlib/param
-	modules/systemlib
-	modules/uORB
-	modules/sensors
-	modules/dataman
-	modules/sdlog2
-	modules/logger
-	modules/simulator
-	modules/commander
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/uORB
+	src/modules/sensors
+	src/modules/dataman
+	src/modules/sdlog2
+	src/modules/logger
+	src/modules/simulator
+	src/modules/commander
 
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/ecl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/version
-	lib/DriverFramework/framework
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/ecl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/version
+	src/lib/DriverFramework/framework
 
-	platforms/common
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
-	modules/muorb/krait
+	src/platforms/common
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
+	src/modules/muorb/krait
 	)
 

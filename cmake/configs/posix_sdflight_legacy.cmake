@@ -20,62 +20,62 @@ set(CONFIG_SHMEM "1")
 
 
 set(config_module_list
-	drivers/device
-	drivers/blinkm
-	drivers/linux_sbus
-	drivers/pwm_out_sim
-	drivers/rgbled
-	drivers/led
-	drivers/boards
-	drivers/qshell/posix
+	src/drivers/device
+	src/drivers/blinkm
+	src/drivers/linux_sbus
+	src/drivers/pwm_out_sim
+	src/drivers/rgbled
+	src/drivers/led
+	src/drivers/boards
+	src/drivers/qshell/posix
 
-	systemcmds/param
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/ver
-	systemcmds/topic_listener
+	src/systemcmds/param
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/ver
+	src/systemcmds/topic_listener
 
-	modules/mavlink
+	src/modules/mavlink
 
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
-	modules/mc_pos_control
-	modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/mc_att_control
 
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/muorb/krait
-	modules/sensors
-	modules/dataman
-	modules/sdlog2
-	modules/logger
-	modules/simulator
-	modules/commander
-	modules/navigator
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/muorb/krait
+	src/modules/sensors
+	src/modules/dataman
+	src/modules/sdlog2
+	src/modules/logger
+	src/modules/simulator
+	src/modules/commander
+	src/modules/navigator
 
 	# micro RTPS
-	modules/micrortps_bridge/micrortps_client
+	src/modules/micrortps_bridge/micrortps_client
 
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/conversion
-	lib/ecl
-	lib/geo
-	lib/geo_lookup
-	lib/led
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/conversion
+	src/lib/ecl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/led
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
 
-	platforms/common
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
+	src/platforms/common
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
 	)

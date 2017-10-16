@@ -38,17 +38,17 @@ set(config_module_list
 	# Board support modules
 	#
 
-	drivers/stm32
-	drivers/led
-	drivers/boards
+	src/drivers/stm32
+	src/drivers/led
+	src/drivers/boards
 
 	#
 	# System commands
 	#
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/config
-	systemcmds/ver
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/ver
 
 	#
 	# General system control
@@ -57,15 +57,15 @@ set(config_module_list
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	lib/version
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/lib/version
 
 	#
 	# Libraries
 	#
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/nuttx
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/nuttx
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 )

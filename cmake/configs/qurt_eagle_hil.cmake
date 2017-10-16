@@ -21,68 +21,68 @@ include(qurt_flags)
 include_directories(${HEXAGON_SDK_INCLUDES})
 
 set(config_module_list
-	drivers/device
-	drivers/boards
-	drivers/pwm_out_sim
-	drivers/led
-	drivers/rgbled
-	modules/sensors
+	src/drivers/device
+	src/drivers/boards
+	src/drivers/pwm_out_sim
+	src/drivers/led
+	src/drivers/rgbled
+	src/modules/sensors
 
 	#
 	# System commands
 	#
-	systemcmds/param
-	systemcmds/led
-	systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/led
+	src/systemcmds/mixer
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/mc_att_control
-	modules/mc_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/commander
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/commander
 
 	#
 	# Libraries
 	#
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/led
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/controllib
-	lib/version
-	lib/DriverFramework/framework
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/led
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/controllib
+	src/lib/version
+	src/lib/DriverFramework/framework
 
 	#
 	# QuRT port
 	#
-	platforms/common
-	platforms/qurt/px4_layer
-	platforms/posix/work_queue
+	src/platforms/common
+	src/platforms/qurt/px4_layer
+	src/platforms/posix/work_queue
 
 	#
 	# sources for muorb over fastrpc
 	#
-	modules/muorb/adsp
+	src/modules/muorb/adsp
 	)

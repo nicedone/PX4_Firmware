@@ -3,10 +3,10 @@ include(nuttx/px4_impl_nuttx)
 px4_nuttx_configure(HWCLASS m3 CONFIG nsh)
 
 set(config_module_list
-	drivers/boards
-	drivers/stm32
-	lib/rc
-	modules/px4iofirmware
-	modules/systemlib/mixer
-	platforms/common
+	src/drivers/boards
+	src/drivers/stm32
+	src/lib/rc
+	src/modules/px4iofirmware
+	src/modules/systemlib/mixer
+	src/platforms/common
 )

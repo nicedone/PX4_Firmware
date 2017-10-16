@@ -8,171 +8,171 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/airspeed
-	drivers/blinkm
-	drivers/bma180
-	drivers/bmi055
-	drivers/bmi160
-	drivers/bmp280
-	drivers/boards
-	drivers/bst
-	drivers/camera_trigger
-	drivers/device
-	drivers/ets_airspeed
-	drivers/frsky_telemetry
-	drivers/gps
-	drivers/hmc5883
-	drivers/hott
-	drivers/hott/hott_sensors
-	drivers/hott/hott_telemetry
-	drivers/iridiumsbd
-	drivers/ist8310
-	drivers/led
-	drivers/lis3mdl
-	drivers/ll40ls
-	drivers/mb12xx
-	drivers/mkblctrl
-	drivers/mpu6000
-	drivers/mpu9250
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/ms5611
-	drivers/oreoled
-	drivers/pwm_input
-	drivers/pwm_out_sim
-	drivers/px4flow
-	drivers/px4fmu
-	drivers/rgbled
-	drivers/rgbled_pwm
-	drivers/sdp3x_airspeed
-	drivers/sf0x
-	drivers/sf1xx
-	drivers/snapdragon_rc_pwm
-	drivers/srf02
-	drivers/stm32
-	drivers/stm32/adc
-	drivers/stm32/tone_alarm
-	drivers/tap_esc
-	drivers/teraranger
-	drivers/vmount
-	modules/sensors
+	src/drivers/airspeed
+	src/drivers/blinkm
+	src/drivers/bma180
+	src/drivers/bmi055
+	src/drivers/bmi160
+	src/drivers/bmp280
+	src/drivers/boards
+	src/drivers/bst
+	src/drivers/camera_trigger
+	src/drivers/device
+	src/drivers/ets_airspeed
+	src/drivers/frsky_telemetry
+	src/drivers/gps
+	src/drivers/hmc5883
+	src/drivers/hott
+	src/drivers/hott/hott_sensors
+	src/drivers/hott/hott_telemetry
+	src/drivers/iridiumsbd
+	src/drivers/ist8310
+	src/drivers/led
+	src/drivers/lis3mdl
+	src/drivers/ll40ls
+	src/drivers/mb12xx
+	src/drivers/mkblctrl
+	src/drivers/mpu6000
+	src/drivers/mpu9250
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/ms5611
+	src/drivers/oreoled
+	src/drivers/pwm_input
+	src/drivers/pwm_out_sim
+	src/drivers/px4flow
+	src/drivers/px4fmu
+	src/drivers/rgbled
+	src/drivers/rgbled_pwm
+	src/drivers/sdp3x_airspeed
+	src/drivers/sf0x
+	src/drivers/sf1xx
+	src/drivers/snapdragon_rc_pwm
+	src/drivers/srf02
+	src/drivers/stm32
+	src/drivers/stm32/adc
+	src/drivers/stm32/tone_alarm
+	src/drivers/tap_esc
+	src/drivers/teraranger
+	src/drivers/vmount
+	src/modules/sensors
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/config
-	systemcmds/dumpfile
-	systemcmds/esc_calib
-	systemcmds/hardfault_log
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/motor_ramp
-	systemcmds/mtd
-	systemcmds/nshterm
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/reboot
-	systemcmds/sd_bench
-	systemcmds/top
-	systemcmds/topic_listener
-	systemcmds/ver
+	src/systemcmds/bl_update
+	src/systemcmds/config
+	src/systemcmds/dumpfile
+	src/systemcmds/esc_calib
+	src/systemcmds/hardfault_log
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/motor_ramp
+	src/systemcmds/mtd
+	src/systemcmds/nshterm
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/reboot
+	src/systemcmds/sd_bench
+	src/systemcmds/top
+	src/systemcmds/topic_listener
+	src/systemcmds/ver
 
 	#
 	# Testing
 	#
-	drivers/sf0x/sf0x_tests
-	drivers/test_ppm
-	#lib/rc/rc_tests
-	modules/commander/commander_tests
-	lib/controllib/controllib_test
-	modules/mavlink/mavlink_tests
-	modules/mc_pos_control/mc_pos_control_tests
-	modules/uORB/uORB_tests
-	systemcmds/tests
+	src/drivers/sf0x/sf0x_tests
+	src/drivers/test_ppm
+	#src/lib/rc/rc_tests
+	src/modules/commander/commander_tests
+	src/lib/controllib/controllib_test
+	src/modules/mavlink/mavlink_tests
+	src/modules/mc_pos_control/mc_pos_control_tests
+	src/modules/uORB/uORB_tests
+	src/systemcmds/tests
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/events
-	modules/gpio_led
-	modules/land_detector
-	modules/load_mon
-	modules/mavlink
-	modules/navigator
-	modules/uavcan
-	modules/camera_feedback
+	src/modules/commander
+	src/modules/events
+	src/modules/gpio_led
+	src/modules/land_detector
+	src/modules/load_mon
+	src/modules/mavlink
+	src/modules/navigator
+	src/modules/uavcan
+	src/modules/camera_feedback
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/ekf2
-	modules/local_position_estimator
-	modules/position_estimator_inav
+	src/modules/attitude_estimator_q
+	src/modules/ekf2
+	src/modules/local_position_estimator
+	src/modules/position_estimator_inav
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/gnd_att_control
+	src/modules/gnd_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
-	modules/sdlog2
+	src/modules/logger
+	src/modules/sdlog2
 
 	#
 	# Library modules
 	#
-	modules/dataman
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
+	src/modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
 
 	# micro RTPS
-	modules/micrortps_bridge/micrortps_client
+	src/modules/micrortps_bridge/micrortps_client
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/conversion
-	lib/DriverFramework/framework
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/launchdetection
-	lib/led
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/terrain_estimation
-	lib/version
+	src/lib/controllib
+	src/lib/conversion
+	src/lib/DriverFramework/framework
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/rc
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/terrain_estimation
+	src/lib/version
 
 	#
 	# Platform
 	#
-	platforms/common
-	platforms/nuttx
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx
+	src/platforms/nuttx/px4_layer
 
 	#
 	# OBC challenge
 	#
-	#modules/bottle_drop
+	#src/modules/bottle_drop
 
 	#
 	# Rover apps

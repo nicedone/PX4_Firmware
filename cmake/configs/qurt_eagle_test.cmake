@@ -21,38 +21,38 @@ include(qurt_flags)
 include_directories(${HEXAGON_SDK_INCLUDES})
 
 set(config_module_list
-	drivers/device
+	src/drivers/device
 
 	#
 	# System commands
 	#
-	systemcmds/param
+	src/systemcmds/param
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
 
 	#
 	# Libraries
 	#
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/conversion
-	lib/DriverFramework/framework
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/conversion
+	src/lib/DriverFramework/framework
 
 	#
 	# QuRT port
 	#
-	platforms/common
-	platforms/qurt/px4_layer
-	platforms/posix/work_queue
-	platforms/qurt/tests/hello
-	platforms/posix/tests/vcdev_test
-	platforms/posix/tests/hrt_test
-	platforms/posix/tests/wqueue
+	src/platforms/common
+	src/platforms/qurt/px4_layer
+	src/platforms/posix/work_queue
+	src/platforms/qurt/tests/hello
+	src/platforms/posix/tests/vcdev_test
+	src/platforms/posix/tests/hrt_test
+	src/platforms/posix/tests/wqueue
 	)
 

@@ -8,138 +8,138 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/samv7
+	src/drivers/device
+	src/drivers/samv7
 #WIP 	drivers/samv7/adc
-	drivers/samv7/tone_alarm
-	drivers/led
-	drivers/px4fmu
-	drivers/boards
-	drivers/rgbled
-	drivers/mpu6000
-	drivers/mpu9250
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/lsm303d
-	drivers/l3gd20
-	drivers/hmc5883
-	drivers/ms5611
-	drivers/mb12xx
-	drivers/srf02
-	drivers/sf0x
-	drivers/ll40ls
-	drivers/teraranger
-	drivers/gps
+	src/drivers/samv7/tone_alarm
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/boards
+	src/drivers/rgbled
+	src/drivers/mpu6000
+	src/drivers/mpu9250
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/lsm303d
+	src/drivers/l3gd20
+	src/drivers/hmc5883
+	src/drivers/ms5611
+	src/drivers/mb12xx
+	src/drivers/srf02
+	src/drivers/sf0x
+	src/drivers/ll40ls
+	src/drivers/teraranger
+	src/drivers/gps
 #WIP 	drivers/pwm_out_sim
-	drivers/hott
-	drivers/hott/hott_telemetry
-	drivers/hott/hott_sensors
-	drivers/blinkm
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/frsky_telemetry
-	modules/sensors
-	#drivers/mkblctrl
-	drivers/px4flow
-	drivers/oreoled
+	src/drivers/hott
+	src/drivers/hott/hott_telemetry
+	src/drivers/hott/hott_sensors
+	src/drivers/blinkm
+	src/drivers/airspeed
+	src/drivers/ets_airspeed
+	src/drivers/frsky_telemetry
+	src/modules/sensors
+	#src/drivers/mkblctrl
+	src/drivers/px4flow
+	src/drivers/oreoled
 ##	drivers/gimbal
 #WIP  	drivers/pwm_input
 #WIP  	drivers/camera_trigger
-	drivers/bst
-	drivers/snapdragon_rc_pwm
-	drivers/lis3mdl
+	src/drivers/bst
+	src/drivers/snapdragon_rc_pwm
+	src/drivers/lis3mdl
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/mixer
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/esc_calib
+	src/systemcmds/bl_update
+	src/systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/esc_calib
 #WIP systemcmds/hardfault_log
-	systemcmds/reboot
+	src/systemcmds/reboot
 	#systemcmds/topic_listener
-	systemcmds/top
-	systemcmds/config
-	systemcmds/nshterm
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/nshterm
 #	systemcmds/mtd Excluded until TWIHS works
-	systemcmds/dumpfile
-	systemcmds/ver
+	src/systemcmds/dumpfile
+	src/systemcmds/ver
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/navigator
-	modules/mavlink
-	modules/gpio_led
+	src/modules/commander
+	src/modules/navigator
+	src/modules/mavlink
+	src/modules/gpio_led
 ##WIP	modules/uavcan
-	modules/land_detector
+	src/modules/land_detector
 
 	#
 	# Estimation modules (EKF/ SO3 / other filters)
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
 	# modules/segway # XXX Needs GCC 4.7 fix
-	modules/fw_pos_control_l1
-	modules/fw_att_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/fw_att_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/sdlog2
+	src/modules/sdlog2
 ##	modules/logger
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/led
-	lib/DriverFramework/framework
-	lib/launchdetection
-	lib/version
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	platforms/nuttx
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/rc
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/led
+	src/lib/DriverFramework/framework
+	src/lib/launchdetection
+	src/lib/version
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 
 	#
 	# OBC challenge
 	#
-	#modules/bottle_drop
+	#src/modules/bottle_drop
 
 	#
 	# Rover apps

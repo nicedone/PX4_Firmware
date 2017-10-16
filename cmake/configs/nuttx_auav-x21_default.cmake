@@ -8,156 +8,156 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/stm32/adc
-	drivers/stm32/tone_alarm
-	drivers/led
-	drivers/px4fmu
-	drivers/px4io
-	drivers/boards
-	drivers/rgbled
-	drivers/mpu6000
-	drivers/mpu9250
-	drivers/hmc5883
-	drivers/ms5611
-	drivers/mb12xx
-	drivers/srf02
-	drivers/sf0x
-	drivers/sf1xx
-	drivers/ll40ls
-	drivers/teraranger
-	drivers/gps
-	drivers/pwm_out_sim
-	drivers/hott
-	drivers/hott/hott_telemetry
-	drivers/hott/hott_sensors
-	drivers/blinkm
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/sdp3x_airspeed
-	drivers/frsky_telemetry
-	modules/sensors
-	drivers/mkblctrl
-	drivers/px4flow
-	drivers/oreoled
-	drivers/vmount
-	drivers/pwm_input
-	drivers/camera_trigger
-	drivers/bst
-	drivers/snapdragon_rc_pwm
-	drivers/lis3mdl
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/stm32/adc
+	src/drivers/stm32/tone_alarm
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/px4io
+	src/drivers/boards
+	src/drivers/rgbled
+	src/drivers/mpu6000
+	src/drivers/mpu9250
+	src/drivers/hmc5883
+	src/drivers/ms5611
+	src/drivers/mb12xx
+	src/drivers/srf02
+	src/drivers/sf0x
+	src/drivers/sf1xx
+	src/drivers/ll40ls
+	src/drivers/teraranger
+	src/drivers/gps
+	src/drivers/pwm_out_sim
+	src/drivers/hott
+	src/drivers/hott/hott_telemetry
+	src/drivers/hott/hott_sensors
+	src/drivers/blinkm
+	src/drivers/airspeed
+	src/drivers/ets_airspeed
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/sdp3x_airspeed
+	src/drivers/frsky_telemetry
+	src/modules/sensors
+	src/drivers/mkblctrl
+	src/drivers/px4flow
+	src/drivers/oreoled
+	src/drivers/vmount
+	src/drivers/pwm_input
+	src/drivers/camera_trigger
+	src/drivers/bst
+	src/drivers/snapdragon_rc_pwm
+	src/drivers/lis3mdl
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/config
-	systemcmds/dumpfile
-	systemcmds/esc_calib
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/hardfault_log
-	systemcmds/motor_ramp
-	systemcmds/mtd
-	systemcmds/nshterm
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/reboot
-	systemcmds/sd_bench
-	systemcmds/top
-	systemcmds/topic_listener
-	systemcmds/ver
+	src/systemcmds/bl_update
+	src/systemcmds/config
+	src/systemcmds/dumpfile
+	src/systemcmds/esc_calib
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/hardfault_log
+	src/systemcmds/motor_ramp
+	src/systemcmds/mtd
+	src/systemcmds/nshterm
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/reboot
+	src/systemcmds/sd_bench
+	src/systemcmds/top
+	src/systemcmds/topic_listener
+	src/systemcmds/ver
 
 	#
 	# Testing
 	#
-	drivers/sf0x/sf0x_tests
-	drivers/test_ppm
-	#lib/rc/rc_tests
-	modules/commander/commander_tests
-	lib/controllib/controllib_test
-	modules/mavlink/mavlink_tests
-	modules/mc_pos_control/mc_pos_control_tests
-	modules/uORB/uORB_tests
-	systemcmds/tests
+	src/drivers/sf0x/sf0x_tests
+	src/drivers/test_ppm
+	#src/lib/rc/rc_tests
+	src/modules/commander/commander_tests
+	src/lib/controllib/controllib_test
+	src/modules/mavlink/mavlink_tests
+	src/modules/mc_pos_control/mc_pos_control_tests
+	src/modules/uORB/uORB_tests
+	src/systemcmds/tests
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/load_mon
-	modules/navigator
-	modules/mavlink
-	modules/gpio_led
-	modules/uavcan
-	modules/land_detector
+	src/modules/commander
+	src/modules/load_mon
+	src/modules/navigator
+	src/modules/mavlink
+	src/modules/gpio_led
+	src/modules/uavcan
+	src/modules/land_detector
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/gnd_att_control
+	src/modules/gnd_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
-	modules/sdlog2
+	src/modules/logger
+	src/modules/sdlog2
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/launchdetection
-	lib/led
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
-	platforms/nuttx
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 
 	#
 	# OBC challenge
 	#
-	#modules/bottle_drop
+	#src/modules/bottle_drop
 
 	#
 	# Rover apps

@@ -6,50 +6,50 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/led
-	drivers/boards
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/led
+	src/drivers/boards
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/mixer
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/config
-	systemcmds/nshterm
-	systemcmds/ver
+	src/systemcmds/bl_update
+	src/systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/nshterm
+	src/systemcmds/ver
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
 
 	#
 	# Libraries
 	#
-	#lib/mathlib/CMSIS
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/conversion
-	lib/version
-	lib/DriverFramework/framework
-	platforms/nuttx
+	#src/lib/mathlib/CMSIS
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/conversion
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 
 	#
 	# Demo apps

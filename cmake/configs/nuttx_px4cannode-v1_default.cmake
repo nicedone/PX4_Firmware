@@ -36,33 +36,33 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/boards
-	drivers/bootloaders
-	drivers/device
-	drivers/led
-	drivers/stm32
+	src/drivers/boards
+	src/drivers/bootloaders
+	src/drivers/device
+	src/drivers/led
+	src/drivers/stm32
 
 	#
 	# System commands
 	#
-	systemcmds/config
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/ver
+	src/systemcmds/config
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/ver
 
 	#
 	# General system control
 	#
-	modules/uavcannode
+	src/modules/uavcannode
 
 	#
 	# Library modules
 	#
-	lib/version
-	modules/systemlib
-	modules/systemlib/param
-	modules/uORB
-	platforms/common
-	platforms/nuttx
-	platforms/nuttx/px4_layer
+	src/lib/version
+	src/modules/systemlib
+	src/modules/systemlib/param
+	src/modules/uORB
+	src/platforms/common
+	src/platforms/nuttx
+	src/platforms/nuttx/px4_layer
 )

@@ -16,105 +16,105 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/sdp3x_airspeed
+	src/drivers/device
+	src/drivers/airspeed
+	src/drivers/ets_airspeed
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/sdp3x_airspeed
 
-	modules/sensors
-	platforms/posix/drivers/df_mpu9250_wrapper
-	platforms/posix/drivers/df_lsm9ds1_wrapper
-	platforms/posix/drivers/df_ms5611_wrapper
-	platforms/posix/drivers/df_hmc5883_wrapper
-	platforms/posix/drivers/df_trone_wrapper
-	platforms/posix/drivers/df_isl29501_wrapper
+	src/modules/sensors
+	src/platforms/posix/drivers/df_mpu9250_wrapper
+	src/platforms/posix/drivers/df_lsm9ds1_wrapper
+	src/platforms/posix/drivers/df_ms5611_wrapper
+	src/platforms/posix/drivers/df_hmc5883_wrapper
+	src/platforms/posix/drivers/df_trone_wrapper
+	src/platforms/posix/drivers/df_isl29501_wrapper
 
 	#
 	# System commands
 	#
-	systemcmds/param
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/ver
-	systemcmds/esc_calib
-	systemcmds/reboot
-	systemcmds/topic_listener
-	systemcmds/perf
+	src/systemcmds/param
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/ver
+	src/systemcmds/esc_calib
+	src/systemcmds/reboot
+	src/systemcmds/topic_listener
+	src/systemcmds/perf
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/position_estimator_inav
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/position_estimator_inav
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/gnd_att_control
+	src/modules/gnd_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Library modules
 	#
-	modules/sdlog2
-	modules/logger
-	modules/commander
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
-	modules/land_detector
-	modules/navigator
-	modules/mavlink
+	src/modules/sdlog2
+	src/modules/logger
+	src/modules/commander
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
+	src/modules/land_detector
+	src/modules/navigator
+	src/modules/mavlink
 
 	#
 	# PX4 drivers
 	#
-	drivers/linux_sbus
-	drivers/gps
-	drivers/navio_adc
-	drivers/navio_sysfs_rc_in
-	drivers/linux_gpio
-	drivers/linux_pwm_out
-	drivers/navio_rgbled
-	drivers/pwm_out_sim
-	drivers/rpi_rc_in
+	src/drivers/linux_sbus
+	src/drivers/gps
+	src/drivers/navio_adc
+	src/drivers/navio_sysfs_rc_in
+	src/drivers/linux_gpio
+	src/drivers/linux_pwm_out
+	src/drivers/navio_rgbled
+	src/drivers/pwm_out_sim
+	src/drivers/rpi_rc_in
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/geo
-	lib/ecl
-	lib/geo_lookup
-	lib/launchdetection
-	lib/led
-	lib/external_lgpl
-	lib/conversion
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/geo
+	src/lib/ecl
+	src/lib/geo_lookup
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/external_lgpl
+	src/lib/conversion
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
 
 	#
 	# POSIX
 	#
-	platforms/common
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
+	src/platforms/common
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
 )
 
 #

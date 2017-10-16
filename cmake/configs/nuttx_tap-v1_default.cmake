@@ -8,104 +8,104 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/stm32/adc
-	drivers/stm32/tone_alarm
-	drivers/led
-	drivers/px4fmu
-	drivers/boards
-	drivers/rgbled_pwm
-	drivers/tap_esc
-	drivers/mpu6000
-	drivers/ms5611
-	drivers/hmc5883
-	drivers/gps
-	drivers/airspeed
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	modules/sensors
-	drivers/vmount
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/stm32/adc
+	src/drivers/stm32/tone_alarm
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/boards
+	src/drivers/rgbled_pwm
+	src/drivers/tap_esc
+	src/drivers/mpu6000
+	src/drivers/ms5611
+	src/drivers/hmc5883
+	src/drivers/gps
+	src/drivers/airspeed
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/modules/sensors
+	src/drivers/vmount
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/led_control
-	systemcmds/mixer
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/hardfault_log
-	systemcmds/motor_test
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/config
-	systemcmds/nshterm
-	systemcmds/mtd
-	systemcmds/dumpfile
-	systemcmds/ver
-	systemcmds/topic_listener
+	src/systemcmds/bl_update
+	src/systemcmds/led_control
+	src/systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/hardfault_log
+	src/systemcmds/motor_test
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/nshterm
+	src/systemcmds/mtd
+	src/systemcmds/dumpfile
+	src/systemcmds/ver
+	src/systemcmds/topic_listener
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/load_mon
-	modules/navigator
-	modules/mavlink
-	modules/land_detector
+	src/modules/commander
+	src/modules/load_mon
+	src/modules/navigator
+	src/modules/mavlink
+	src/modules/land_detector
 
 	#
 	# Estimation modules (EKF/ SO3 / other filters)
 	#
-	modules/ekf2
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_pos_control_l1
-	modules/fw_att_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/fw_att_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
+	src/modules/logger
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/launchdetection
-	lib/led
-	lib/rc
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/terrain_estimation
-	lib/version
-	lib/DriverFramework/framework
-	platforms/nuttx
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/rc
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/terrain_estimation
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 )

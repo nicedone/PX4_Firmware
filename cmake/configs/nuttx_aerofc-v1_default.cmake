@@ -8,87 +8,87 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/led
-	drivers/px4fmu
-	drivers/boards
-	drivers/tap_esc
-	drivers/mpu9250
-	drivers/ms5611
-	drivers/hmc5883
-	drivers/gps
-	drivers/ist8310
-	drivers/ll40ls
-	drivers/aerofc_adc
-	modules/sensors
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/boards
+	src/drivers/tap_esc
+	src/drivers/mpu9250
+	src/drivers/ms5611
+	src/drivers/hmc5883
+	src/drivers/gps
+	src/drivers/ist8310
+	src/drivers/ll40ls
+	src/drivers/aerofc_adc
+	src/modules/sensors
 
 	#
 	# System commands
 	#
-	systemcmds/mixer
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/motor_test
-	systemcmds/reboot
-	systemcmds/top
-	systemcmds/config
-	systemcmds/nshterm
-	systemcmds/dumpfile
-	systemcmds/ver
+	src/systemcmds/mixer
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/motor_test
+	src/systemcmds/reboot
+	src/systemcmds/top
+	src/systemcmds/config
+	src/systemcmds/nshterm
+	src/systemcmds/dumpfile
+	src/systemcmds/ver
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/load_mon
-	modules/navigator
-	modules/mavlink
-	modules/land_detector
+	src/modules/commander
+	src/modules/load_mon
+	src/modules/navigator
+	src/modules/mavlink
+	src/modules/land_detector
 
 	#
 	# Estimation modules
 	#
-	modules/attitude_estimator_q
-	modules/local_position_estimator
-	modules/ekf2
+	src/modules/attitude_estimator_q
+	src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/mc_att_control
-	modules/mc_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
 
 	#
 	# Logging
 	#
-	modules/logger
+	src/modules/logger
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/ecl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
-	lib/rc
-	platforms/nuttx
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/ecl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/lib/rc
+	src/platforms/nuttx
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 )

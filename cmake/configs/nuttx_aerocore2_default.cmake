@@ -8,136 +8,136 @@ set(config_module_list
 	#
 	# Board support modules
 	#
-	drivers/device
-	drivers/stm32
-	drivers/stm32/adc
-	drivers/stm32/tone_alarm
-	drivers/led
-	drivers/px4fmu
-	drivers/boards
-	drivers/lsm303d
-	drivers/l3gd20
-	drivers/ms5611
-	drivers/teraranger
-	drivers/gps
-	drivers/pwm_out_sim
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/ms4525_airspeed
-	drivers/ms5525_airspeed
-	drivers/sdp3x_airspeed
-	#drivers/frsky_telemetry
-	modules/sensors
-	#drivers/pwm_input
-	#drivers/camera_trigger
-	drivers/bst
+	src/drivers/device
+	src/drivers/stm32
+	src/drivers/stm32/adc
+	src/drivers/stm32/tone_alarm
+	src/drivers/led
+	src/drivers/px4fmu
+	src/drivers/boards
+	src/drivers/lsm303d
+	src/drivers/l3gd20
+	src/drivers/ms5611
+	src/drivers/teraranger
+	src/drivers/gps
+	src/drivers/pwm_out_sim
+	src/drivers/airspeed
+	src/drivers/ets_airspeed
+	src/drivers/ms4525_airspeed
+	src/drivers/ms5525_airspeed
+	src/drivers/sdp3x_airspeed
+	#src/drivers/frsky_telemetry
+	src/modules/sensors
+	#src/drivers/pwm_input
+	#src/drivers/camera_trigger
+	src/drivers/bst
 
 	#
 	# System commands
 	#
-	systemcmds/bl_update
-	systemcmds/config
+	src/systemcmds/bl_update
+	src/systemcmds/config
 	#systemcmds/dumpfile
 	#systemcmds/esc_calib
-	systemcmds/mixer
+	src/systemcmds/mixer
 	#systemcmds/motor_ramp
-	systemcmds/mtd
-	systemcmds/nshterm
-	systemcmds/param
-	systemcmds/perf
-	systemcmds/pwm
-	systemcmds/reboot
+	src/systemcmds/mtd
+	src/systemcmds/nshterm
+	src/systemcmds/param
+	src/systemcmds/perf
+	src/systemcmds/pwm
+	src/systemcmds/reboot
 	#systemcmds/sd_bench
-	systemcmds/top
+	src/systemcmds/top
 	#systemcmds/topic_listener
-	systemcmds/ver
+	src/systemcmds/ver
 
 	#
 	# Testing
 	#
-	#drivers/sf0x/sf0x_tests
-	#drivers/test_ppm
-	#lib/rc/rc_tests
-	#modules/commander/commander_tests
-	#lib/controllib/controllib_test
-	#modules/mavlink/mavlink_tests
-	#modules/unit_test
-	#modules/uORB/uORB_tests
+	#src/drivers/sf0x/sf0x_tests
+	#src/drivers/test_ppm
+	#src/lib/rc/rc_tests
+	#src/modules/commander/commander_tests
+	#src/lib/controllib/controllib_test
+	#src/modules/mavlink/mavlink_tests
+	#src/modules/unit_test
+	#src/modules/uORB/uORB_tests
 	#systemcmds/tests
 
 	#
 	# General system control
 	#
-	modules/commander
-	modules/load_mon
-	modules/navigator
-	modules/mavlink
-	modules/uavcan
-	modules/land_detector
+	src/modules/commander
+	src/modules/load_mon
+	src/modules/navigator
+	src/modules/mavlink
+	src/modules/uavcan
+	src/modules/land_detector
 
 	#
 	# Estimation modules
 	#
-	#modules/attitude_estimator_q
-	#modules/position_estimator_inav
-	#modules/local_position_estimator
-	modules/ekf2
+	#src/modules/attitude_estimator_q
+	#src/modules/position_estimator_inav
+	#src/modules/local_position_estimator
+	src/modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
-	modules/mc_att_control
-	modules/mc_pos_control
-	modules/vtol_att_control
+	src/modules/fw_att_control
+	src/modules/fw_pos_control_l1
+	src/modules/gnd_att_control
+	src/modules/gnd_pos_control
+	src/modules/mc_att_control
+	src/modules/mc_pos_control
+	src/modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	modules/logger
-	#modules/sdlog2
+	src/modules/logger
+	#src/modules/sdlog2
 
 	#
 	# Library modules
 	#
-	modules/systemlib/param
-	modules/systemlib
-	modules/systemlib/mixer
-	modules/uORB
-	modules/dataman
+	src/modules/systemlib/param
+	src/modules/systemlib
+	src/modules/systemlib/mixer
+	src/modules/uORB
+	src/modules/dataman
 
 	#
 	# Libraries
 	#
-	lib/controllib
-	lib/mathlib
-	lib/mathlib/math/filter
-	lib/rc
-	lib/ecl
-	lib/external_lgpl
-	lib/geo
-	lib/geo_lookup
-	lib/conversion
-	lib/launchdetection
-	lib/led
-	lib/terrain_estimation
-	lib/runway_takeoff
-	lib/tailsitter_recovery
-	lib/version
-	lib/DriverFramework/framework
-	platforms/nuttx
+	src/lib/controllib
+	src/lib/mathlib
+	src/lib/mathlib/math/filter
+	src/lib/rc
+	src/lib/ecl
+	src/lib/external_lgpl
+	src/lib/geo
+	src/lib/geo_lookup
+	src/lib/conversion
+	src/lib/launchdetection
+	src/lib/led
+	src/lib/terrain_estimation
+	src/lib/runway_takeoff
+	src/lib/tailsitter_recovery
+	src/lib/version
+	src/lib/DriverFramework/framework
+	src/platforms/nuttx
 
 	# had to add for cmake, not sure why wasn't in original config
-	platforms/common
-	platforms/nuttx/px4_layer
+	src/platforms/common
+	src/platforms/nuttx/px4_layer
 
 	#
 	# OBC challenge
 	#
-	#modules/bottle_drop
+	#src/modules/bottle_drop
 
 	#
 	# Rover apps

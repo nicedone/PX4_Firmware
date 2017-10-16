@@ -14,15 +14,15 @@ else()
 endif()
 
 set(config_module_list
-	drivers/device
+	src/drivers/device
 
-	modules/uORB
+	src/modules/uORB
 
-	lib/DriverFramework/framework
+	src/lib/DriverFramework/framework
 
-	platforms/posix/px4_layer
-	platforms/posix/work_queue
+	src/platforms/posix/px4_layer
+	src/platforms/posix/work_queue
 
-	modules/muorb/krait
+	src/modules/muorb/krait
 	)
 
