@@ -32,16 +32,22 @@
 ############################################################################
 
 set(SRCS)
+include_directories(../../../../src/drivers/device)
 
 list(APPEND SRCS
-	ringbuffer.cpp
-	integrator.cpp
+	device_nuttx.cpp
+	cdev.cpp
 )
-
+if ("${CONFIG_I2C}" STREQUAL "y")
+	list(APPEND SRCS i2c_nuttx.cpp)
+endif()
+if ("${CONFIG_SPI}" STREQUAL "y")
+	list(APPEND SRCS spi.cpp)
+endif()
 
 px4_add_module(
-	MODULE drivers__device
+	MODULE drivers__device__nuttx
 	SRCS ${SRCS}
 	DEPENDS
-		platforms__common
+		drivers__device
 	)

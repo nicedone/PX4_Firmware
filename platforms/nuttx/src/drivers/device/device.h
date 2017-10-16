@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2015 Mark Charlebois. All rights reserved.
+ *   Copyright (c) 2012-2014 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,10 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 #pragma once
 
-#ifdef __PX4_NUTTX
-#include "i2c_nuttx.h"
-#else
-#include "i2c_posix.h"
-#endif
+#include "device_nuttx.h"
+
+#include <nuttx/arch.h>
+#define ATOMIC_ENTER irqstate_t flags = px4_enter_critical_section()
+#define ATOMIC_LEAVE px4_leave_critical_section(flags)
+

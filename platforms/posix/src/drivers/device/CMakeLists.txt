@@ -34,14 +34,17 @@
 set(SRCS)
 
 list(APPEND SRCS
-	ringbuffer.cpp
-	integrator.cpp
+	device_posix.cpp
+	vdev.cpp
+	vfile.cpp
+	vdev_posix.cpp
+	i2c_posix.cpp
+	sim.cpp
 )
 
-
 px4_add_module(
-	MODULE drivers__device
+	MODULE drivers__device__posix
 	SRCS ${SRCS}
 	DEPENDS
-		platforms__common
+		drivers__device
 	)

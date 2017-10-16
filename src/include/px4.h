@@ -39,11 +39,11 @@
 
 #pragma once
 
-#include "../platforms/px4_includes.h"
-#include "../platforms/px4_defines.h"
+#include "../../platforms/include/px4_includes.h"
+#include "../../platforms/include/px4_defines.h"
 #ifdef __cplusplus
-#include "../platforms/px4_middleware.h"
-#include "../platforms/px4_nodehandle.h"
-#include "../platforms/px4_subscriber.h"
-#include "../platforms/px4_parameter.h"
+#include "../../platforms/include/px4_middleware.h"
+#include "../../platforms/include/px4_nodehandle.h"
+#include "../../platforms/include/px4_subscriber.h"
+#include "../../platforms/include/px4_parameter.h"
 #endif
