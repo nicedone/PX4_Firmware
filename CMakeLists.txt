@@ -438,7 +438,7 @@ foreach(module ${config_module_list})
 		STRING(REGEX REPLACE "/" "__" EXT_MODULE_PREFIX ${EXT_MODULE})
 		add_subdirectory(${module} ${PX4_BINARY_DIR}/${EXT_MODULE_PREFIX})
 	else()
-		add_subdirectory(src/${module})
+		add_subdirectory(${module})
 	endif()
 endforeach()
 
