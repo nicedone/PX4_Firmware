@@ -78,6 +78,8 @@
 #include <uORB/topics/transponder_report.h>
 #include <uORB/topics/gps_inject_data.h>
 #include <uORB/topics/collision_report.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 
 #include "mavlink_mission.h"
 #include "mavlink_parameters.h"
