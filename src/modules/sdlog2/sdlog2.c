@@ -101,6 +101,8 @@
 #include <uORB/topics/commander_state.h>
 #include <uORB/topics/cpuload.h>
 #include <uORB/topics/task_stack_info.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 
 #include <systemlib/systemlib.h>
 #include <systemlib/param/param.h>
