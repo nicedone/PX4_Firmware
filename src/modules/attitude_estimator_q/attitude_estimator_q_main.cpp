@@ -54,6 +54,8 @@
 #include <uORB/topics/sensor_combined.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_global_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
+
 
 extern "C" __EXPORT int attitude_estimator_q_main(int argc, char *argv[]);
 
