@@ -21,6 +21,7 @@
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/vehicle_gps_position.h>
 #include <uORB/topics/att_pos_mocap.h>
+#include <uORB/topics/vehicle_vision_position.h>
 
 // uORB Publications
 #include <uORB/Publication.hpp>
