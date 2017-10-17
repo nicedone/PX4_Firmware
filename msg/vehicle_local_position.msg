@@ -55,4 +55,4 @@ float32 epv				# Standard deviation of vertical position error, (metres)
 float32 evh				# Standard deviation of horizontal velocity error, (metres/sec)
 float32 evv				# Standard deviation of horizontal velocity error, (metres/sec)
 
-# TOPICS vehicle_local_position vehicle_local_position_groundtruth vehicle_vision_position
+# TOPICS vehicle_local_position vehicle_local_position_groundtruth
