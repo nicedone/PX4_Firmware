@@ -69,6 +69,8 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 
 #include "replay.hpp"
 
