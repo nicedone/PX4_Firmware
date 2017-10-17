@@ -63,6 +63,7 @@
 #include <uORB/topics/att_pos_mocap.h>
 #include <uORB/topics/optical_flow.h>
 #include <uORB/topics/distance_sensor.h>
+#include <uORB/topics/vehicle_vision_position.h>
 #include <poll.h>
 #include <systemlib/err.h>
 #include <systemlib/mavlink_log.h>
