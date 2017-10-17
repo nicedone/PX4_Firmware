@@ -67,6 +67,8 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 #include <uORB/topics/wind_estimate.h>
 
 using control::BlockParamFloat;
@@ -482,8 +484,8 @@ void Ekf2::run()
 	optical_flow_s optical_flow = {};
 	distance_sensor_s range_finder = {};
 	vehicle_land_detected_s vehicle_land_detected = {};
-	vehicle_local_position_s ev_pos = {};
-	vehicle_attitude_s ev_att = {};
+	vehicle_vision_position_s ev_pos = {};
+	vehicle_vision_attitude_s ev_att = {};
 	vehicle_status_s vehicle_status = {};
 	sensor_selection_s sensor_selection = {};
 	sensor_baro_s sensor_baro = {};
