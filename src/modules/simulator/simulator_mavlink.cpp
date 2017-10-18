@@ -1182,3 +1182,42 @@ int Simulator::publish_distance_topic(mavlink_distance_sensor_t *dist_mavlink)
 
 	return OK;
 }
+
+int Simulator::publish_vision_position_topic(mavlink_local_position_ned_cov_t *position){
+
+	uint64_t timestamp = hrt_absolute_time();
+	struct vehicle_vision_position_s vision_position = {};
+
+	vision_position.timestamp = timestamp;
+	vision_position.x = position->x;
+	vision_position.y = position->y;
+	vision_position.z = position->z;
+	vision_position.xy_valid = true;
+	vision_position.z_valid = true;
+	vision_position.vx = position->vx;
+	vision_position.vy = position->vy;
+	vision_position.vz = position->vz;
+	vision_position.v_xy_valid = true;
+	vision_position.v_z_valid = true;
+	memcpy(&vision_position.covariance, position->covariance, sizeof(vision_position.covariance));
+
+	int inst = 0;
+	orb_publish_auto(ORB_ID(vehicle_vision_position), &_vision_position_pub, &vision_position, &inst, ORB_PRIO_HIGH);
+
+	return OK;
+}
+
+int Simulator::publish_vision_attitude_topic(mavlink_attitude_quaternion_cov_t *attitude){
+
+	uint64_t timestamp = hrt_absolute_time();
+	struct vehicle_vision_attitude_s vision_attitude = {};
+
+	vision_attitude.timestamp = timestamp;
+	memcpy(&vision_attitude.q, attitude->q, sizeof(vision_attitude.q));
+	memcpy(&vision_attitude.covariance, attitude->covariance, sizeof(vision_attitude.covariance));
+
+	int inst = 0;
+	orb_publish_auto(ORB_ID(vehicle_vision_attitude), &_vision_attitude_pub, &vision_attitude, &inst, ORB_PRIO_HIGH);
+
+	return OK;
+}
