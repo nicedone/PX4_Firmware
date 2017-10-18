@@ -92,6 +92,8 @@
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
 #include <uORB/topics/mount_orientation.h>
@@ -1681,7 +1683,7 @@ protected:
 
 	bool send(const hrt_abstime t)
 	{
-		struct vehicle_local_position_s vpos = {};
+		struct vehicle_vision_position_s vpos = {};
 		struct vehicle_attitude_s vatt = {};
 
 		bool att_updated = _att_sub->update(&_att_time, &vatt);
