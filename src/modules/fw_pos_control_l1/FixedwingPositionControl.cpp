@@ -88,6 +88,7 @@ FixedwingPositionControl::FixedwingPositionControl() :
 	_parameter_handles.height_comp_filter_omega =		param_find("FW_T_HGT_OMEGA");
 	_parameter_handles.speed_comp_filter_omega =		param_find("FW_T_SPD_OMEGA");
 	_parameter_handles.roll_throttle_compensation = 	param_find("FW_T_RLL2THR");
+	_parameter_handles.pitch_throttle_compensation = 	param_find("FW_T_PTCH2THR");
 	_parameter_handles.speed_weight = 			param_find("FW_T_SPDWEIGHT");
 	_parameter_handles.pitch_damping = 			param_find("FW_T_PTCH_DAMP");
 	_parameter_handles.heightrate_p =			param_find("FW_T_HRATE_P");
@@ -169,6 +170,7 @@ FixedwingPositionControl::parameters_update()
 	param_get(_parameter_handles.height_comp_filter_omega, &(_parameters.height_comp_filter_omega));
 	param_get(_parameter_handles.speed_comp_filter_omega, &(_parameters.speed_comp_filter_omega));
 	param_get(_parameter_handles.roll_throttle_compensation, &(_parameters.roll_throttle_compensation));
+	param_get(_parameter_handles.pitch_throttle_compensation, &(_parameters.pitch_throttle_compensation));
 	param_get(_parameter_handles.speed_weight, &(_parameters.speed_weight));
 	param_get(_parameter_handles.pitch_damping, &(_parameters.pitch_damping));
 	param_get(_parameter_handles.max_climb_rate, &(_parameters.max_climb_rate));
@@ -211,6 +213,8 @@ FixedwingPositionControl::parameters_update()
 	_tecs.set_height_comp_filter_omega(_parameters.height_comp_filter_omega);
 	_tecs.set_speed_comp_filter_omega(_parameters.speed_comp_filter_omega);
 	_tecs.set_roll_throttle_compensation(_parameters.roll_throttle_compensation);
+	_tecs.set_pitch_throttle_compensation(_parameters.pitch_throttle_compensation);
+	_tecs.set_pitch_offset(_parameters.pitchsp_offset_rad);
 	_tecs.set_speed_weight(_parameters.speed_weight);
 	_tecs.set_pitch_damping(_parameters.pitch_damping);
 	_tecs.set_indicated_airspeed_min(_parameters.airspeed_min);

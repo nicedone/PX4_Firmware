@@ -45,6 +45,8 @@ public:
 		_integGain(0.0f),
 		_vertAccLim(0.0f),
 		_rollComp(0.0f),
+		_pitchComp(0.0f),
+		_pitchOffset(0.0f),
 		_spdWeight(1.0f),
 		_heightrate_p(0.0f),
 		_heightrate_ff(0.0f),
@@ -228,6 +230,16 @@ public:
 		_rollComp = compensation;
 	}
 
+	void set_pitch_throttle_compensation(float compensation)
+	{
+		_pitchComp = compensation;
+	}
+
+	void set_pitch_offset(float offset)
+	{
+		_pitchOffset = offset;
+	}
+
 	void set_speed_weight(float weight)
 	{
 		_spdWeight = weight;
@@ -315,6 +327,8 @@ private:
 	float _integGain;
 	float _vertAccLim;
 	float _rollComp;
+	float _pitchComp;
+	float _pitchOffset;
 	float _spdWeight;
 	float _heightrate_p;
 	float _heightrate_ff;

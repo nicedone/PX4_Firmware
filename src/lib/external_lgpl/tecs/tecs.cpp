@@ -374,6 +374,11 @@ void TECS::_update_throttle(float throttle_cruise, const math::Matrix<3, 3> &rot
 
 		} else {
 			_throttle_dem = ff_throttle;
+
+			// scale throttle over pitch demand if enabled
+			if (_pitchComp > 0.01f && _pitch_dem > _pitchOffset) {
+				_throttle_dem = _throttle_dem + (((_pitch_dem - _pitchOffset) * 57.2958f * _pitchComp) / 100.0f);
+			}
 		}
 
 		// Constrain throttle demand

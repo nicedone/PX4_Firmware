@@ -279,6 +279,7 @@ private:
 		float height_comp_filter_omega;
 		float speed_comp_filter_omega;
 		float roll_throttle_compensation;
+		float pitch_throttle_compensation;
 		float speed_weight;
 		float pitch_damping;
 
@@ -337,6 +338,7 @@ private:
 		param_t height_comp_filter_omega;
 		param_t speed_comp_filter_omega;
 		param_t roll_throttle_compensation;
+		param_t pitch_throttle_compensation;
 		param_t speed_weight;
 		param_t pitch_damping;
 

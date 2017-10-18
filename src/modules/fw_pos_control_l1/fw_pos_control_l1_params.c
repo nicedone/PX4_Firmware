@@ -578,6 +578,21 @@ PARAM_DEFINE_FLOAT(FW_T_SPD_OMEGA, 2.0f);
 PARAM_DEFINE_FLOAT(FW_T_RLL2THR, 15.0f);
 
 /**
+ * Pitch -> Throttle feedforward
+ *
+ * This value translates the demanded pitch to an increase in throttle
+ * when airspeed sensor is disabled. It adds the set amount of throttle
+ * percentage for 1 degree of positive pitch above the Pitch Setpoint Offset.
+ *
+ * @min 0.0
+ * @max 5.0
+ * @decimal 1
+ * @increment 0.1
+ * @group FW TECS
+ */
+PARAM_DEFINE_FLOAT(FW_T_PTCH2THR, 0.0f);
+
+/**
  * Speed <--> Altitude priority
  *
  * This parameter adjusts the amount of weighting that the pitch control
