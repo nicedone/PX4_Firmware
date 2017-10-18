@@ -528,7 +528,18 @@ void Simulator::handle_message(mavlink_message_t *msg, bool publish)
 		}
 		break;
 
+	case MAVLINK_MSG_ID_LOCAL_POSITION_NED_COV: {
+			mavlink_local_position_ned_cov_t position;
+			mavlink_msg_local_position_ned_cov_decode(msg, &position);
+			publish_vision_position_topic(&position);
+		}
+		break;
 
+	case MAVLINK_MSG_ID_ATTITUDE_QUATERNION_COV: {
+			mavlink_attitude_quaternion_cov_t attitude;
+			mavlink_msg_attitude_quaternion_cov_decode(msg, &attitude);
+			publish_vision_attitude_topic(&attitude);
+		}
 		break;
 	}
 
