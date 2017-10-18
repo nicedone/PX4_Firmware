@@ -47,6 +47,8 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/vehicle_vision_position.h>
+#include <uORB/topics/vehicle_vision_attitude.h>
 #include <drivers/drv_accel.h>
 #include <drivers/drv_gyro.h>
 #include <drivers/drv_baro.h>
@@ -353,6 +355,8 @@ private:
 	int publish_flow_topic(mavlink_hil_optical_flow_t *flow);
 	int publish_ev_topic(mavlink_vision_position_estimate_t *ev_mavlink);
 	int publish_distance_topic(mavlink_distance_sensor_t *dist);
+	int publish_vision_position_topic(mavlink_local_position_ned_cov_t *position);
+	int publish_vision_attitude_topic(mavlink_attitude_quaternion_cov_t *attitude);
 
 #ifndef __PX4_QURT
 	// uORB publisher handlers
