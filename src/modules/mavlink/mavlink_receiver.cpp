@@ -1112,7 +1112,7 @@ MavlinkReceiver::handle_message_attitude_quaternion_cov(mavlink_message_t *msg)
 	mavlink_attitude_quaternion_cov_t att;
 	mavlink_msg_attitude_quaternion_cov_decode(msg, &att);
 
-	struct vehicle_attitude_s vision_attitude = {};
+	struct vehicle_vision_attitude_s vision_attitude = {};
 
 	vision_attitude.timestamp = sync_stamp(att.time_usec);
 
@@ -1125,7 +1125,7 @@ MavlinkReceiver::handle_message_attitude_quaternion_cov(mavlink_message_t *msg)
 	vision_attitude.pitchspeed = att.pitchspeed;
 	vision_attitude.yawspeed = att.yawspeed;
 
-	// TODO : full covariance matrix
+	memcpy(&vision_attitude.covariance, &att.covariance, sizeof(vision_attitude.covariance));
 
 	int instance_id = 0;
 	orb_publish_auto(ORB_ID(vehicle_vision_attitude), &_vision_attitude_pub, &vision_attitude, &instance_id, ORB_PRIO_HIGH);
@@ -1138,7 +1138,7 @@ MavlinkReceiver::handle_message_local_position_ned_cov(mavlink_message_t *msg)
 	mavlink_local_position_ned_cov_t pos;
 	mavlink_msg_local_position_ned_cov_decode(msg, &pos);
 
-	struct vehicle_local_position_s vision_position = {};
+	struct vehicle_vision_position_s vision_position = {};
 
 	vision_position.timestamp = sync_stamp(pos.time_usec);
 
@@ -1155,9 +1155,9 @@ MavlinkReceiver::handle_message_local_position_ned_cov(mavlink_message_t *msg)
 	vision_position.vy = pos.vy;
 	vision_position.vz = pos.vz;
 
-	// Low risk change for now. TODO : full covariance matrix
 	vision_position.eph = sqrtf(fmaxf(pos.covariance[0], pos.covariance[9]));
 	vision_position.epv = sqrtf(pos.covariance[17]);
+	memcpy(&vision_position.covariance, &pos.covariance, sizeof(vision_position.covariance));
 
 	vision_position.xy_global = globallocalconverter_initialized();
 	vision_position.z_global = globallocalconverter_initialized();
@@ -1177,14 +1177,14 @@ MavlinkReceiver::handle_message_vision_position_estimate(mavlink_message_t *msg)
 	mavlink_vision_position_estimate_t pos;
 	mavlink_msg_vision_position_estimate_decode(msg, &pos);
 
-	struct vehicle_local_position_s vision_position = {};
+	struct vehicle_vision_position_s vision_position = {};
 
 	vision_position.timestamp = sync_stamp(pos.usec);
 	vision_position.x = pos.x;
 	vision_position.y = pos.y;
 	vision_position.z = pos.z;
 
-	struct vehicle_attitude_s vision_attitude = {};
+	struct vehicle_vision_attitude_s vision_attitude = {};
 
 	vision_attitude.timestamp = sync_stamp(pos.usec);
 
