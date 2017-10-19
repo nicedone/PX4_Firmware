@@ -30,6 +30,22 @@ uint8 vxy_reset_counter
 float32 delta_vz
 uint8 vz_reset_counter
 
+# Heading
+float32 yaw				# Euler yaw angle transforming the tangent plane relative to NED earth-fixed frame, -PI..+PI,  (radians) 
+
+# Position of reference point (local NED frame origin) in global (GPS / WGS84) frame
+bool xy_global				# true if position (x, y) has a valid global reference (ref_lat, ref_lon)
+bool z_global				# true if z has a valid global reference (ref_alt)
+uint64 ref_timestamp			# Time when reference position was set since system start, (microseconds)
+float64 ref_lat				# Reference point latitude, (degrees)
+float64 ref_lon				# Reference point longitude, (degrees)
+float32 ref_alt				# Reference altitude AMSL, MUST be set to current (not at reference point!) ground level, (metres)
+
+# Distance to surface
+float32 dist_bottom			# Distance from from bottom surface to ground, (metres)
+float32 dist_bottom_rate		# Rate of change of distance from bottom surface to ground, (metres/sec)
+bool dist_bottom_valid			# true if distance to bottom surface is valid
+
 float32 eph				# Standard deviation of horizontal position error, (metres)
 float32 epv				# Standard deviation of vertical position error, (metres)
 float32 evh				# Standard deviation of horizontal velocity error, (metres/sec)
