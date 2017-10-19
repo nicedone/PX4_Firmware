@@ -329,7 +329,7 @@ void AttitudeEstimatorQ::task_main()
 		orb_check(_vision_sub, &vision_updated);
 
 		if (vision_updated) {
-			vehicle_attitude_s vision;
+			vehicle_vision_attitude_s _vision;
 
 			if (orb_copy(ORB_ID(vehicle_vision_attitude), _vision_sub, &vision) == PX4_OK) {
 				math::Quaternion q(vision.q);
