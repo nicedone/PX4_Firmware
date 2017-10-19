@@ -1170,8 +1170,8 @@ int sdlog2_thread_main(int argc, char *argv[])
 		struct vehicle_global_position_s global_pos;
 		struct position_setpoint_triplet_s triplet;
 		struct att_pos_mocap_s att_pos_mocap;
-		struct vehicle_local_position_s vision_pos;
-		struct vehicle_attitude_s vision_att;
+		struct vehicle_vision_position_s vision_pos;
+		struct vehicle_vision_attitude_s vision_att;
 		struct optical_flow_s flow;
 		struct rc_channels_s rc;
 		struct differential_pressure_s diff_pres;
