@@ -331,7 +331,7 @@ int attitude_estimator_ekf_thread_main(int argc, char *argv[])
 	math::Matrix<3, 3> R_decl;
 	R_decl.identity();
 
-	struct vehicle_attitude_s vision {};
+	struct vehicle_vision_attitude_s vision {};
 	struct att_pos_mocap_s mocap {};
 
 	/* register the perf counter */
