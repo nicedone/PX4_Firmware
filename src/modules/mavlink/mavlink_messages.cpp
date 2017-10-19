@@ -1684,7 +1684,7 @@ protected:
 	bool send(const hrt_abstime t)
 	{
 		struct vehicle_vision_position_s vpos = {};
-		struct vehicle_attitude_s vatt = {};
+		struct vehicle_vision_attitude_s vatt = {};
 
 		bool att_updated = _att_sub->update(&_att_time, &vatt);
 		bool pos_updated = _pos_sub->update(&_pos_time, &vpos);
