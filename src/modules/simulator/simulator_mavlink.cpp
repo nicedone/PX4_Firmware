@@ -1140,14 +1140,14 @@ int Simulator::publish_ev_topic(mavlink_vision_position_estimate_t *ev_mavlink)
 {
 	uint64_t timestamp = hrt_absolute_time();
 
-	struct vehicle_local_position_s vision_position = {};
+	struct vehicle_vision_position_s vision_position = {};
 
 	vision_position.timestamp = timestamp;
 	vision_position.x = ev_mavlink->x;
 	vision_position.y = ev_mavlink->y;
 	vision_position.z = ev_mavlink->z;
 
-	struct vehicle_attitude_s vision_attitude = {};
+	struct vehicle_vision_attitude_s vision_attitude = {};
 
 	vision_attitude.timestamp = timestamp;
 
