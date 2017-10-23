@@ -34,7 +34,6 @@
 set(SRCS
 	airspeed.c
 	battery.cpp
-	board_serial.c
 	bson/tinybson.c
 	circuit_breaker.cpp
 	conversions.c
