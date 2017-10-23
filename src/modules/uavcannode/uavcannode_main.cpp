@@ -48,7 +48,6 @@
 #include <systemlib/systemlib.h>
 #include <systemlib/param/param.h>
 #include <systemlib/mixer/mixer.h>
-#include <systemlib/board_serial.h>
 #include <version/version.h>
 __BEGIN_DECLS
 #include <nuttx/board.h>
