@@ -883,6 +883,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 
 		/* If we are in offboard control mode and offboard control loop through is enabled
 		 * also publish the setpoint topic which is read by the controller */
+		/* HACK for QuadraCreek Simulation: force to always get offboard setpoint */
 		if (true || _mavlink->get_forward_externalsp()) {
 			bool updated;
 			orb_check(_control_mode_sub, &updated);
@@ -891,6 +892,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 				orb_copy(ORB_ID(vehicle_control_mode), _control_mode_sub, &_control_mode);
 			}
 
+			/* HACK for QuadraCreek Simulation: force to always get offboard setpoint */
 			if (true || _control_mode.flag_control_offboard_enabled) {
 				if (is_force_sp && offboard_control_mode.ignore_position &&
 				    offboard_control_mode.ignore_velocity) {
