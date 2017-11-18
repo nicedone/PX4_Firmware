@@ -624,7 +624,6 @@ void
 MS5611::cycle()
 {
 	int ret;
-	unsigned dummy;
 
 	/* collection phase? */
 	if (_collect_phase) {
@@ -644,7 +643,8 @@ MS5611::cycle()
 			}
 
 			/* issue a reset command to the sensor */
-			_interface->ioctl(IOCTL_RESET, dummy);
+			_interface->reset();
+
 			/* reset the collection state machine and try again - we need
 			 * to wait 2.8 ms after issuing the sensor reset command
 			 * according to the MS5611 datasheet
@@ -680,7 +680,7 @@ MS5611::cycle()
 
 	if (ret != OK) {
 		/* issue a reset command to the sensor */
-		_interface->ioctl(IOCTL_RESET, dummy);
+		_interface->reset();
 		/* reset the collection state machine and try again */
 		start_cycle();
 		return;
@@ -712,7 +712,7 @@ MS5611::measure()
 	/*
 	 * Send the command to begin measuring.
 	 */
-	ret = _interface->ioctl(IOCTL_MEASURE, addr);
+	ret = _interface->measure(addr);
 
 	if (OK != ret) {
 		perf_count(_comms_errors);

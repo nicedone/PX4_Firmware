@@ -68,13 +68,10 @@ class LIS3MDL_I2C : public device::I2C
 {
 public:
 	LIS3MDL_I2C(int bus);
-	virtual ~LIS3MDL_I2C();
+	virtual ~LIS3MDL_I2C() = default;
 
-	virtual int	init();
 	virtual int	read(unsigned address, void *data, unsigned count);
 	virtual int	write(unsigned address, void *data, unsigned count);
-
-	virtual int	ioctl(unsigned operation, unsigned &arg);
 
 protected:
 	virtual int	probe();
@@ -91,39 +88,6 @@ LIS3MDL_I2C::LIS3MDL_I2C(int bus) :
 	I2C("LIS3MDL_I2C", nullptr, bus, LIS3MDLL_ADDRESS, 400000)
 {
 	_device_id.devid_s.devtype = DRV_MAG_DEVTYPE_LIS3MDL;
-}
-
-LIS3MDL_I2C::~LIS3MDL_I2C()
-{
-}
-
-int
-LIS3MDL_I2C::init()
-{
-	/* this will call probe() */
-	return I2C::init();
-}
-
-int
-LIS3MDL_I2C::ioctl(unsigned operation, unsigned &arg)
-{
-	int ret;
-
-	switch (operation) {
-
-	case MAGIOCGEXTERNAL:
-		external();
-
-	/* FALLTHROUGH */
-
-	case DEVIOCGDEVICEID:
-		return CDev::ioctl(nullptr, operation, arg);
-
-	default:
-		ret = -EINVAL;
-	}
-
-	return ret;
 }
 
 int

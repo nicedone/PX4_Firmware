@@ -52,12 +52,9 @@
 #include "mag.h"
 #include "gyro.h"
 
-
-
 #if defined(PX4_I2C_OBDEV_MPU9250)
 #  define USE_I2C
 #endif
-
 
 // MPU 9250 registers
 #define MPUREG_WHOAMI			0x75
@@ -192,9 +189,6 @@
 
 #define MPU9250_ONE_G					9.80665f
 
-#define MPUIOCGIS_I2C	(unsigned)(DEVIOCGDEVICEID+100)
-
-
 #pragma pack(push, 1)
 /**
  * Report conversation within the mpu, including command byte and
@@ -238,9 +232,6 @@ extern device::Device *MPU9250_I2C_interface(int bus, bool external_bus);
 extern int MPU9250_probe(device::Device *dev, int device_type);
 
 typedef device::Device *(*MPU9250_constructor)(int, bool);
-
-
-
 
 class MPU9250_mag;
 class MPU9250_gyro;
@@ -412,9 +403,6 @@ private:
 
 	bool is_i2c(void) { return !_use_hrt; }
 
-
-
-
 	/**
 	 * Static trampoline from the hrt_call context; because we don't have a
 	 * generic hrt wrapper yet.
@@ -490,17 +478,6 @@ private:
 	 * Swap a 16-bit value read from the mpu to native byte order.
 	 */
 	uint16_t		swap16(uint16_t val) { return (val >> 8) | (val << 8);	}
-
-	/**
-	 * Get the internal / external state
-	 *
-	 * @return true if the sensor is not on the main MCU board
-	 */
-	bool			is_external()
-	{
-		unsigned dummy;
-		return _interface->ioctl(ACCELIOCGEXTERNAL, dummy);
-	}
 
 	/**
 	 * Measurement self test

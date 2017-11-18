@@ -466,8 +466,6 @@ LPS25H::read(struct file *filp, char *buffer, size_t buflen)
 int
 LPS25H::ioctl(struct file *filp, int cmd, unsigned long arg)
 {
-	unsigned dummy = arg;
-
 	switch (cmd) {
 	case SENSORIOCSPOLLRATE: {
 			switch (arg) {
@@ -567,9 +565,6 @@ LPS25H::ioctl(struct file *filp, int cmd, unsigned long arg)
 
 	case BAROIOCGMSLPRESSURE:
 		return _msl_pressure;
-
-	case DEVIOCGDEVICEID:
-		return _interface->ioctl(cmd, dummy);
 
 	default:
 		/* give it to the superclass */

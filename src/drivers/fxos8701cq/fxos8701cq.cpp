@@ -265,7 +265,7 @@ private:
 	 *
 	 * Resets the chip and measurements ranges, but not scale and offset.
 	 */
-	void			reset();
+	int			reset() override;
 
 	/**
 	 * disable I2C on the chip
@@ -631,10 +631,9 @@ out:
 }
 
 
-void
+int
 FXOS8701CQ::reset()
 {
-
 	/* enable accel set it To Standby */
 
 	write_checked_reg(FXOS8701CQ_CTRL_REG1, 0);
@@ -666,6 +665,8 @@ FXOS8701CQ::reset()
 
 	_accel_read = 0;
 	_mag_read = 0;
+
+	return PX4_OK;
 }
 
 int
@@ -1664,14 +1665,7 @@ FXOS8701CQ_mag::read(struct file *filp, char *buffer, size_t buflen)
 int
 FXOS8701CQ_mag::ioctl(struct file *filp, int cmd, unsigned long arg)
 {
-	switch (cmd) {
-	case DEVIOCGDEVICEID:
-		return (int)CDev::ioctl(filp, cmd, arg);
-		break;
-
-	default:
-		return _parent->mag_ioctl(filp, cmd, arg);
-	}
+	return _parent->mag_ioctl(filp, cmd, arg);
 }
 
 void

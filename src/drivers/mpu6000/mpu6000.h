@@ -214,14 +214,6 @@
 
 #define MPU6000_ONE_G					9.80665f
 
-#ifdef PX4_SPI_BUS_EXT
-#define EXTERNAL_BUS PX4_SPI_BUS_EXT
-#else
-#define EXTERNAL_BUS 0
-#endif
-
-#define MPUIOCGIS_I2C	(unsigned)(DEVIOCGDEVICEID+100)
-
 #pragma pack(push, 1)
 /**
  * Report conversation within the MPU6000, including command byte and

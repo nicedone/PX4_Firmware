@@ -92,7 +92,8 @@ public:
 	virtual int	init();
 	virtual int	read(unsigned offset, void *data, unsigned count = 1);
 	virtual int	write(unsigned address, void *data, unsigned count = 1);
-	virtual int	ioctl(unsigned operation, unsigned &arg);
+
+	int	test(unsigned operation, unsigned arg) override;
 
 private:
 	/*
@@ -315,9 +316,8 @@ PX4IO_serial::init()
 }
 
 int
-PX4IO_serial::ioctl(unsigned operation, unsigned &arg)
+PX4IO_serial::test(unsigned operation, unsigned arg)
 {
-
 	switch (operation) {
 
 	case 1:		/* XXX magic number - test operation */

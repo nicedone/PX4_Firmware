@@ -487,8 +487,7 @@ MPL3115A2::ioctl(struct file *filp, int cmd, unsigned long arg)
 			 * Since we are initialized, we do not need to do anything, since the
 			 * PROM is correctly read and the part does not need to be configured.
 			 */
-			unsigned int dummy;
-			_interface->ioctl(IOCTL_RESET, dummy);
+			_interface->reset();
 			return OK;
 		}
 
@@ -544,7 +543,6 @@ void
 MPL3115A2::cycle()
 {
 	int ret;
-	unsigned dummy;
 
 	/* collection phase? */
 	if (_collect_phase) {
@@ -554,7 +552,7 @@ MPL3115A2::cycle()
 
 		if (ret == -EIO) {
 			/* issue a reset command to the sensor */
-			_interface->ioctl(IOCTL_RESET, dummy);
+			_interface->reset();
 			/* reset the collection state machine and try again - we need
 			 * to wait 2.8 ms after issuing the sensor reset command
 			 * according to the MPL3115A2 datasheet
@@ -585,7 +583,7 @@ MPL3115A2::cycle()
 
 	if (ret == -EIO) {
 		/* issue a reset command to the sensor */
-		_interface->ioctl(IOCTL_RESET, dummy);
+		_interface->reset();
 		/* reset the collection state machine and try again */
 		start_cycle();
 		return;
@@ -613,7 +611,7 @@ MPL3115A2::measure()
 	 * Send the command to read the ADC for P and T.
 	 */
 	unsigned addr = (MPL3115A2_CTRL_REG1 << 8) | MPL3115A2_CTRL_TRIGGER;
-	ret = _interface->ioctl(IOCTL_MEASURE, addr);
+	ret = _interface->measure(addr);
 
 	if (ret == -EIO) {
 		perf_count(_comms_errors);
