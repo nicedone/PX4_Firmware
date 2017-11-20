@@ -636,6 +636,10 @@ then
 		iridiumsbd start -d /dev/ttyS2
 		mavlink start -d /dev/iridium -b 19200 -m iridium -r 10
 	fi
+	if param compare SYS_COMPANION 5460800
+	then
+		micrortps_client start -t UART -d /dev/ttyS2 -b 460800
+	fi
 	if param compare SYS_COMPANION 1921600
 	then
 		mavlink start -d ${MAVLINK_COMPANION_DEVICE} -b 921600 -r 20000
