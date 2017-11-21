@@ -3077,6 +3077,22 @@ MulticopterPositionControl::task_main()
 
 		update_velocity_derivative();
 
+		if(_control_mode.flag_control_offboard_enabled ) {
+
+			control_offboard();
+
+		} else if (_control_mode.flag_control_manual_enabled) {
+
+			//control_manual();
+
+		} else if (_control_mode.flag_control_auto_enabled) {
+
+			//control_auto();
+
+		} else {
+			PX4_ERROR("Not recognized mode");
+		}
+
 		// reset the horizontal and vertical position hold flags for non-manual modes
 		// or if position / altitude is not controlled
 		if (!_control_mode.flag_control_position_enabled || !_control_mode.flag_control_manual_enabled) {
