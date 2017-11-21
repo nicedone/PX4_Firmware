@@ -367,6 +367,10 @@ private:
 
 	void do_control();
 
+	void generate_offboard_setpoints();
+	void generate_manual_setpoints();
+	void generate_auto_setpoints();
+
 	void generate_attitude_setpoint();
 
 	float get_cruising_speed_xy();
@@ -2782,6 +2786,25 @@ MulticopterPositionControl::calculate_thrust_setpoint()
 }
 
 void
+MulticopterPositionControl::generate_offboard_setpoints()
+{
+
+
+}
+
+void
+MulticopterPositionControl::generate_manual_setpoints()
+{
+
+}
+
+void
+MulticopterPositionControl::generate_auto_setpoints()
+{
+
+}
+
+void
 MulticopterPositionControl::generate_attitude_setpoint()
 {
 	// yaw setpoint is integrated over time, but we don't want to integrate the offset's
@@ -3077,17 +3100,25 @@ MulticopterPositionControl::task_main()
 
 		update_velocity_derivative();
 
+		/* generate sepoints
+		 * pos_sp
+		 * vel_sp
+		 * acc_sp
+		 * yaw_sp
+		 * yaw_speed_sp
+		 */
+
 		if(_control_mode.flag_control_offboard_enabled ) {
 
-			control_offboard();
+			generate_offboard_setpoints();
 
 		} else if (_control_mode.flag_control_manual_enabled) {
 
-			//control_manual();
+			generate_manual_setpoints();
 
 		} else if (_control_mode.flag_control_auto_enabled) {
 
-			//control_auto();
+			generate_auto_setpoints();
 
 		} else {
 			PX4_ERROR("Not recognized mode");
