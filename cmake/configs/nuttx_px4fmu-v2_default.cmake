@@ -51,6 +51,7 @@ set(config_module_list
 	drivers/sf1xx
 	#drivers/snapdragon_rc_pwm
 	#drivers/srf02
+	drivers/ssd1306
 	drivers/stm32
 	drivers/stm32/adc
 	drivers/stm32/tone_alarm
