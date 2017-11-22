@@ -375,7 +375,8 @@ private:
 	void generate_offboard_setpoints();
 	void generate_manual_setpoints();
 	void generate_auto_setpoints();
-
+	void position_controller();
+	void velocity_controller();
 	void generate_attitude_setpoint();
 
 	float get_cruising_speed_xy();
