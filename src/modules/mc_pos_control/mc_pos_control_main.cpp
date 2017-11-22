@@ -3718,6 +3718,253 @@ void MulticopterPositionControl::position_controller() {
 }
 
 
+void MulticopterPositionControl::velocity_controller() {
+
+	if (_control_mode.flag_control_climb_rate_enabled
+			|| _control_mode.flag_control_velocity_enabled
+			|| _control_mode.flag_control_acceleration_enabled) {
+
+		/* reset integrals if needed */
+		if (_control_mode.flag_control_climb_rate_enabled) {
+			if (_reset_int_z) {
+				_reset_int_z = false;
+				_thrust_int(2) = 0.0f;
+			}
+
+		} else {
+			_reset_int_z = true;
+		}
+
+		if (_control_mode.flag_control_velocity_enabled) {
+			if (_reset_int_xy) {
+				_reset_int_xy = false;
+				_thrust_int(0) = 0.0f;
+				_thrust_int(1) = 0.0f;
+			}
+
+		} else {
+			_reset_int_xy = true;
+		}
+
+		/* if any of the velocity setpoint is bogus, it's probably safest to command no velocity at all. */
+		for (int i = 0; i < 3; ++i) {
+			if (!PX4_ISFINITE(_vel_sp(i))) {
+				_vel_sp(i) = 0.0f;
+			}
+		}
+
+		/* velocity error */
+		math::Vector < 3 > vel_err = _vel_sp - _vel;
+
+		if (_control_mode.flag_control_acceleration_enabled
+				&& _pos_sp_triplet.current.acceleration_valid) {
+			_thrust_sp = math::Vector<3>(_pos_sp_triplet.current.a_x,
+					_pos_sp_triplet.current.a_y, _pos_sp_triplet.current.a_z);
+
+		} else {
+			_thrust_sp = vel_err.emult(_params.vel_p)
+					+ _vel_err_d.emult(_params.vel_d) + _thrust_int
+					- math::Vector<3>(0.0f, 0.0f, _params.thr_hover);
+		}
+
+		if (!_control_mode.flag_control_velocity_enabled
+				&& !_control_mode.flag_control_acceleration_enabled) {
+			_thrust_sp(0) = 0.0f;
+			_thrust_sp(1) = 0.0f;
+		}
+
+		if (!in_auto_takeoff() && !manual_wants_takeoff()) {
+			if (_vehicle_land_detected.ground_contact) {
+				/* if still or already on ground command zero xy _thrust_sp in body
+				 * frame to consider uneven ground */
+
+				/* thrust setpoint in body frame*/
+				math::Vector < 3 > thrust_sp_body = _R.transposed() * _thrust_sp;
+
+				/* we dont want to make any correction in body x and y*/
+				thrust_sp_body(0) = 0.0f;
+				thrust_sp_body(1) = 0.0f;
+
+				/* make sure z component of thrust_sp_body is larger than 0 (positive thrust is downward) */
+				thrust_sp_body(2) = _thrust_sp(2) > 0.0f ? _thrust_sp(2) : 0.0f;
+
+				/* convert back to local frame (NED) */
+				_thrust_sp = _R * thrust_sp_body;
+			}
+
+			if (_vehicle_land_detected.maybe_landed) {
+				/* we set thrust to zero
+				 * this will help to decide if we are actually landed or not
+				 */
+				_thrust_sp.zero();
+			}
+		}
+
+		if (!_control_mode.flag_control_climb_rate_enabled
+				&& !_control_mode.flag_control_acceleration_enabled) {
+			_thrust_sp(2) = 0.0f;
+		}
+
+		/* limit thrust vector and check for saturation */
+		bool saturation_xy = false;
+		bool saturation_z = false;
+
+		/* limit min lift */
+		float thr_min = _params.thr_min;
+
+		if (!_control_mode.flag_control_velocity_enabled && thr_min < 0.0f) {
+			/* don't allow downside thrust direction in manual attitude mode */
+			thr_min = 0.0f;
+		}
+
+		float tilt_max = _params.tilt_max_air;
+		float thr_max = _params.thr_max;
+
+		// We can only run the control if we're already in-air, have a takeoff setpoint,
+		// or if we're in offboard control.
+		// Otherwise, we should just bail out
+		if (_vehicle_land_detected.landed && !in_auto_takeoff()
+				&& !manual_wants_takeoff()) {
+			// Keep throttle low while still on ground.
+			thr_max = 0.0f;
+
+		} else if (!_control_mode.flag_control_manual_enabled
+				&& _pos_sp_triplet.current.valid
+				&& _pos_sp_triplet.current.type
+						== position_setpoint_s::SETPOINT_TYPE_LAND) {
+
+			/* adjust limits for landing mode */
+			/* limit max tilt and min lift when landing */
+			tilt_max = _params.tilt_max_land;
+		}
+
+		/* limit min lift */
+		if (-_thrust_sp(2) < thr_min) {
+			_thrust_sp(2) = -thr_min;
+			/* Don't freeze altitude integral if it wants to throttle up */
+			saturation_z = vel_err(2) > 0.0f ? true : saturation_z;
+		}
+
+		if (_control_mode.flag_control_velocity_enabled
+				|| _control_mode.flag_control_acceleration_enabled) {
+
+			/* limit max tilt */
+			if (thr_min >= 0.0f && tilt_max < M_PI_F / 2 - 0.05f) {
+				/* absolute horizontal thrust */
+				float thrust_sp_xy_len = math::Vector<2>(_thrust_sp(0),
+						_thrust_sp(1)).length();
+
+				if (thrust_sp_xy_len > 0.01f) {
+					/* max horizontal thrust for given vertical thrust*/
+					float thrust_xy_max = -_thrust_sp(2) * tanf(tilt_max);
+
+					if (thrust_sp_xy_len > thrust_xy_max) {
+						float k = thrust_xy_max / thrust_sp_xy_len;
+						_thrust_sp(0) *= k;
+						_thrust_sp(1) *= k;
+						/* Don't freeze x,y integrals if they both want to throttle down */
+						saturation_xy =
+								((vel_err(0) * _vel_sp(0) < 0.0f)
+										&& (vel_err(1) * _vel_sp(1) < 0.0f)) ?
+										saturation_xy : true;
+					}
+				}
+			}
+		}
+
+		if (_control_mode.flag_control_climb_rate_enabled
+				&& !_control_mode.flag_control_velocity_enabled) {
+			/* thrust compensation when vertical velocity but not horizontal velocity is controlled */
+			float att_comp;
+
+			const float tilt_cos_max = 0.7f;
+
+			if (_R(2, 2) > tilt_cos_max) {
+				att_comp = 1.0f / _R(2, 2);
+
+			} else if (_R(2, 2) > 0.0f) {
+				att_comp = ((1.0f / tilt_cos_max - 1.0f) / tilt_cos_max)
+						* _R(2, 2) + 1.0f;
+				saturation_z = true;
+
+			} else {
+				att_comp = 1.0f;
+				saturation_z = true;
+			}
+
+			_thrust_sp(2) *= att_comp;
+		}
+
+		/* Calculate desired total thrust amount in body z direction. */
+		/* To compensate for excess thrust during attitude tracking errors we
+		 * project the desired thrust force vector F onto the real vehicle's thrust axis in NED:
+		 * body thrust axis [0,0,-1]' rotated by R is: R*[0,0,-1]' = -R_z */
+		matrix::Vector3f R_z(_R(0, 2), _R(1, 2), _R(2, 2));
+		matrix::Vector3f F(_thrust_sp.data);
+		float thrust_body_z = F.dot(-R_z); /* recalculate because it might have changed */
+
+		/* limit max thrust */
+		if (fabsf(thrust_body_z) > thr_max) {
+			if (_thrust_sp(2) < 0.0f) {
+				if (-_thrust_sp(2) > thr_max) {
+					/* thrust Z component is too large, limit it */
+					_thrust_sp(0) = 0.0f;
+					_thrust_sp(1) = 0.0f;
+					_thrust_sp(2) = -thr_max;
+					saturation_xy = true;
+					/* Don't freeze altitude integral if it wants to throttle down */
+					saturation_z = vel_err(2) < 0.0f ? true : saturation_z;
+
+				} else {
+					/* preserve thrust Z component and lower XY, keeping altitude is more important than position */
+					float thrust_xy_max = sqrtf(
+							thr_max * thr_max - _thrust_sp(2) * _thrust_sp(2));
+					float thrust_xy_abs = math::Vector<2>(_thrust_sp(0),
+							_thrust_sp(1)).length();
+					float k = thrust_xy_max / thrust_xy_abs;
+					_thrust_sp(0) *= k;
+					_thrust_sp(1) *= k;
+					/* Don't freeze x,y integrals if they both want to throttle down */
+					saturation_xy =
+							((vel_err(0) * _vel_sp(0) < 0.0f)
+									&& (vel_err(1) * _vel_sp(1) < 0.0f)) ?
+									saturation_xy : true;
+				}
+
+			} else {
+				/* Z component is positive, going down (Z is positive down in NED), simply limit thrust vector */
+				float k = thr_max / fabsf(thrust_body_z);
+				_thrust_sp *= k;
+				saturation_xy = true;
+				saturation_z = true;
+			}
+
+			thrust_body_z = thr_max;
+		}
+
+		/* if any of the thrust setpoint is bogus, send out a warning */
+		if (!PX4_ISFINITE(
+				_thrust_sp(
+						0)) || !PX4_ISFINITE(_thrust_sp(1)) || !PX4_ISFINITE(_thrust_sp(2))) {
+			warn_rate_limited("Thrust setpoint not finite");
+		}
+
+		_throttle = math::max(thrust_body_z, thr_min);
+
+		/* update integrals */
+		if (_control_mode.flag_control_velocity_enabled && !saturation_xy) {
+			_thrust_int(0) += vel_err(0) * _params.vel_i(0) * _dt;
+			_thrust_int(1) += vel_err(1) * _params.vel_i(1) * _dt;
+		}
+
+		if (_control_mode.flag_control_climb_rate_enabled && !saturation_z) {
+			_thrust_int(2) += vel_err(2) * _params.vel_i(2) * _dt;
+		}
+
+	} else {
+		_reset_int_z = true;
+	}
+
 }
 
 void
