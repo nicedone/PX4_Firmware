@@ -2939,8 +2939,45 @@ MulticopterPositionControl::generate_manual_setpoints()
 		reset_pos_sp();
 	}
 
+	/* generate yaw and yawspeed setpoint if attitude control is enabled */
+	if (_control_mode.flag_control_attitude_enabled) {
+		// yaw setpoint is integrated over time, but we don't want to integrate the offset's
+		_yaw_sp -= _man_yaw_offset;
+		_man_yaw_offset = 0.f;
+
+		/* reset yaw setpoint to current position if needed */
+		if (_reset_yaw_sp) {
+			_reset_yaw_sp = false;
+			_yaw_sp = _yaw;
+
+		} else if (!_vehicle_land_detected.landed
+				&& !(!_control_mode.flag_control_altitude_enabled
+						&& _manual.z < 0.1f)) {
+
+			/* do not move yaw while sitting on the ground */
+
+			/* we want to know the real constraint, and global overrides manual */
+			const float yaw_rate_max =
+					(_params.man_yaw_max < _params.global_yaw_max) ?
+							_params.man_yaw_max : _params.global_yaw_max;
+			const float yaw_offset_max = yaw_rate_max / _params.mc_att_yaw_p;
+
+			_yaw_speed_sp = _manual.r * yaw_rate_max;
+			float yaw_target = _wrap_pi(_yaw_sp + _yaw_sp * _dt);
+			float yaw_offs = _wrap_pi(yaw_target - _yaw);
+
+			// If the yaw offset became too big for the system to track stop
+			// shifting it, only allow if it would make the offset smaller again.
+			if (fabsf(yaw_offs) < yaw_offset_max
+					|| (_yaw_speed_sp > 0 && yaw_offs < 0)
+					|| (_yaw_speed_sp < 0 && yaw_offs > 0)) {
+				_yaw_sp = yaw_target;
+			}
+		}
+	}
+
 	/* prepare yaw to rotate into NED frame */
-	float yaw_input_frame = _control_mode.flag_control_fixed_hdg_enabled ? _yaw_takeoff : _att_sp.yaw_body;
+	float yaw_input_frame = _control_mode.flag_control_fixed_hdg_enabled ? _yaw_takeoff : _yaw_sp;
 
 	/* setpoint in NED frame */
 	man_vel_sp = matrix::Dcmf(matrix::Eulerf(0.0f, 0.0f, yaw_input_frame)) * man_vel_sp;
@@ -3973,40 +4010,6 @@ MulticopterPositionControl::generate_attitude_setpoint()
 	/* generate attitude setpoint from manual controls */
 	if (_control_mode.flag_control_manual_enabled
 			&& _control_mode.flag_control_attitude_enabled) {
-		// yaw setpoint is integrated over time, but we don't want to integrate the offset's
-		_att_sp.yaw_body -= _man_yaw_offset;
-		_man_yaw_offset = 0.f;
-
-		/* reset yaw setpoint to current position if needed */
-		if (_reset_yaw_sp) {
-			_reset_yaw_sp = false;
-			_att_sp.yaw_body = _yaw;
-
-		} else if (!_vehicle_land_detected.landed
-				&& !(!_control_mode.flag_control_altitude_enabled
-						&& _manual.z < 0.1f)) {
-
-			/* do not move yaw while sitting on the ground */
-
-			/* we want to know the real constraint, and global overrides manual */
-			const float yaw_rate_max =
-					(_params.man_yaw_max < _params.global_yaw_max) ?
-							_params.man_yaw_max : _params.global_yaw_max;
-			const float yaw_offset_max = yaw_rate_max / _params.mc_att_yaw_p;
-
-			_att_sp.yaw_sp_move_rate = _manual.r * yaw_rate_max;
-			float yaw_target = _wrap_pi(
-					_att_sp.yaw_body + _att_sp.yaw_sp_move_rate * _dt);
-			float yaw_offs = _wrap_pi(yaw_target - _yaw);
-
-			// If the yaw offset became too big for the system to track stop
-			// shifting it, only allow if it would make the offset smaller again.
-			if (fabsf(yaw_offs) < yaw_offset_max
-					|| (_att_sp.yaw_sp_move_rate > 0 && yaw_offs < 0)
-					|| (_att_sp.yaw_sp_move_rate < 0 && yaw_offs > 0)) {
-				_att_sp.yaw_body = yaw_target;
-			}
-		}
 
 		/* control throttle directly if no climb rate controller is active */
 		if (!_control_mode.flag_control_climb_rate_enabled) {
