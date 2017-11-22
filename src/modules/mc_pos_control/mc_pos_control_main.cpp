@@ -4147,6 +4147,9 @@ MulticopterPositionControl::generate_attitude_setpoint()
 	} else if(_control_mode.flag_control_climb_rate_enabled || _control_mode.flag_control_velocity_enabled ||
 			    _control_mode.flag_control_acceleration_enabled) {
 
+		_reset_yaw_sp = true;
+		_yaw_speed_sp = 0.0f;
+
 		/* calculate attitude setpoint from thrust vector */
 		if (_control_mode.flag_control_velocity_enabled
 				|| _control_mode.flag_control_acceleration_enabled) {
@@ -4227,9 +4230,9 @@ MulticopterPositionControl::generate_attitude_setpoint()
 		_local_pos_sp.acc_y = _thrust_sp(1) * CONSTANTS_ONE_G;
 		_local_pos_sp.acc_z = _thrust_sp(2) * CONSTANTS_ONE_G;
 
-		_att_sp.timestamp = hrt_absolute_time();
-
 	} else {
+		_reset_yaw_sp = true;
+		_yaw_speed_sp = 0.0f;
 		_reset_int_z = true;
 	}
 }
@@ -4447,6 +4450,34 @@ MulticopterPositionControl::task_main()
 		 * Output: attitude setpoint vector + throttle
 		 */
 		generate_attitude_setpoint();
+
+		/* fill and publish att_sp message */
+		_att_sp.yaw_body = _yaw_sp;
+		_att_sp.yaw_sp_move_rate = _yaw_speed_sp;
+		_att_sp.timestamp = hrt_absolute_time();
+
+		/* publish attitude setpoint
+		 * Do not publish if
+		 * - offboard is enabled but position/velocity/accel control is disabled,
+		 * in this case the attitude setpoint is published by the mavlink app.
+		 * - if the vehicle is a VTOL and it's just doing a transition (the VTOL attitude control module will generate
+		 * attitude setpoints for the transition).
+		 * - if not armed
+		 */
+		if (_control_mode.flag_armed
+				&& (!(_control_mode.flag_control_offboard_enabled
+						&& !(_control_mode.flag_control_position_enabled
+								|| _control_mode.flag_control_velocity_enabled
+								|| _control_mode.flag_control_acceleration_enabled)))) {
+
+			if (_att_sp_pub != nullptr) {
+				orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);
+
+			} else if (_attitude_setpoint_id) {
+				_att_sp_pub = orb_advertise(_attitude_setpoint_id, &_att_sp);
+			}
+		}
+
 		// reset the horizontal and vertical position hold flags for non-manual modes
 		// or if position / altitude is not controlled
 		if (!_control_mode.flag_control_position_enabled || !_control_mode.flag_control_manual_enabled) {
