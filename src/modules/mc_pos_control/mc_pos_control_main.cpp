@@ -3981,8 +3981,8 @@ void MulticopterPositionControl::velocity_controller() {
 
 		/* if any of the thrust setpoint is bogus, send out a warning */
 		if (!PX4_ISFINITE(
-				_thrust_sp(
-						0)) || !PX4_ISFINITE(_thrust_sp(1)) || !PX4_ISFINITE(_thrust_sp(2))) {
+				_thrust_sp(0)) || !PX4_ISFINITE(_thrust_sp(1)) ||
+				!PX4_ISFINITE(_thrust_sp(2))) {
 			warn_rate_limited("Thrust setpoint not finite");
 		}
 
@@ -4454,6 +4454,7 @@ MulticopterPositionControl::task_main()
 		/* fill and publish att_sp message */
 		_att_sp.yaw_body = _yaw_sp;
 		_att_sp.yaw_sp_move_rate = _yaw_speed_sp;
+		_att_sp.thrust = _throttle;
 		_att_sp.timestamp = hrt_absolute_time();
 
 		/* publish attitude setpoint
