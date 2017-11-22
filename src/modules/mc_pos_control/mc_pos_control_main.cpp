@@ -3998,6 +3998,23 @@ void MulticopterPositionControl::velocity_controller() {
 			_thrust_int(2) += vel_err(2) * _params.vel_i(2) * _dt;
 		}
 
+
+		if (_control_mode.flag_control_manual_enabled
+				&& _control_mode.flag_control_attitude_enabled) {
+
+			/* control throttle directly if no climb rate controller is active */
+			if (!_control_mode.flag_control_climb_rate_enabled) {
+				float thr_val = throttle_curve(_manual.z, _params.thr_hover);
+				_throttle = math::min(thr_val, _manual_thr_max.get());
+
+				/* enforce minimum throttle if not landed */
+				if (!_vehicle_land_detected.landed) {
+					_throttle = math::max(_throttle,
+							_manual_thr_min.get());
+				}
+			}
+		}
+
 	} else {
 		_reset_int_z = true;
 	}
@@ -4010,18 +4027,6 @@ MulticopterPositionControl::generate_attitude_setpoint()
 	/* generate attitude setpoint from manual controls */
 	if (_control_mode.flag_control_manual_enabled
 			&& _control_mode.flag_control_attitude_enabled) {
-
-		/* control throttle directly if no climb rate controller is active */
-		if (!_control_mode.flag_control_climb_rate_enabled) {
-			float thr_val = throttle_curve(_manual.z, _params.thr_hover);
-			_att_sp.thrust = math::min(thr_val, _manual_thr_max.get());
-
-			/* enforce minimum throttle if not landed */
-			if (!_vehicle_land_detected.landed) {
-				_att_sp.thrust = math::max(_att_sp.thrust,
-						_manual_thr_min.get());
-			}
-		}
 
 		/* control roll and pitch directly if no aiding velocity controller is active */
 		if (!_control_mode.flag_control_velocity_enabled) {
