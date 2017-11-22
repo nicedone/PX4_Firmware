@@ -4325,6 +4325,20 @@ MulticopterPositionControl::task_main()
 			_vel_sp_prev = _vel;
 		}
 
+		/* Inputs: position setpoints and estimation
+		 * Outputs: velocity setpoints
+		 */
+		position_controller();
+
+		/* Inputs: velocity setpoints and estimation
+		 * Outputs: thrust Vector
+		 */
+		velocity_controller();
+
+		/* Inputs: thrust setpoint
+		 * Output: attitude setpoint vector + throttle
+		 */
+		generate_attitude_setpoint();
 		// reset the horizontal and vertical position hold flags for non-manual modes
 		// or if position / altitude is not controlled
 		if (!_control_mode.flag_control_position_enabled || !_control_mode.flag_control_manual_enabled) {
