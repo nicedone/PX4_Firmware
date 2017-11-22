@@ -3618,6 +3618,105 @@ MulticopterPositionControl::generate_auto_setpoints()
 
 }
 
+void MulticopterPositionControl::position_controller() {
+
+	/* run position & altitude controllers, if enabled (otherwise use already computed velocity setpoints) */
+	if (_run_pos_control) {
+
+		// If for any reason, we get a NaN position setpoint, we better just stay where we are.
+		if (PX4_ISFINITE(_pos_sp(0))&& PX4_ISFINITE(_pos_sp(1))) {
+			_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0);
+			_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1);
+
+		} else {
+			_vel_sp(0) = 0.0f;
+			_vel_sp(1) = 0.0f;
+			warn_rate_limited("Caught invalid pos_sp in x and y");
+
+		}
+	}
+
+	/* in auto the setpoint is already limited by the navigator */
+	if (!_control_mode.flag_control_auto_enabled) {
+		limit_altitude();
+	}
+
+	if (_run_alt_control) {
+		if (PX4_ISFINITE(_pos_sp(2))) {
+			_vel_sp(2) = (_pos_sp(2) - _pos(2)) * _params.pos_p(2);
+
+		} else {
+			_vel_sp(2) = 0.0f;
+			warn_rate_limited("Caught invalid pos_sp in z");
+		}
+	}
+
+	if (!_control_mode.flag_control_position_enabled) {
+		_reset_pos_sp = true;
+	}
+
+	if (!_control_mode.flag_control_altitude_enabled) {
+		_reset_alt_sp = true;
+	}
+
+	if (!_control_mode.flag_control_velocity_enabled) {
+		_vel_sp_prev(0) = _vel(0);
+		_vel_sp_prev(1) = _vel(1);
+		_vel_sp(0) = 0.0f;
+		_vel_sp(1) = 0.0f;
+	}
+
+	if (!_control_mode.flag_control_climb_rate_enabled) {
+		_vel_sp(2) = 0.0f;
+	}
+
+	/* limit vertical upwards speed in auto takeoff and close to ground */
+	float altitude_above_home = -_pos(2) + _home_pos.z;
+
+	if (_pos_sp_triplet.current.valid
+	&& _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_TAKEOFF
+	&& !_control_mode.flag_control_manual_enabled) {
+		float vel_limit = math::gradual(altitude_above_home,
+		_params.slow_land_alt2, _params.slow_land_alt1,
+		_params.tko_speed, _params.vel_max_up);
+		_vel_sp(2) = math::max(_vel_sp(2), -vel_limit);
+	}
+
+	/* limit vertical downwards speed (positive z) close to ground
+	 * for now we use the altitude above home and assume that we want to land at same height as we took off */
+	float vel_limit = math::gradual(altitude_above_home,
+	_params.slow_land_alt2, _params.slow_land_alt1,
+	_params.land_speed, _params.vel_max_down);
+
+	_vel_sp(2) = math::min(_vel_sp(2), vel_limit);
+
+	/* apply slewrate (aka acceleration limit) for smooth flying */
+	if (!_control_mode.flag_control_auto_enabled && !_in_smooth_takeoff) {
+		vel_sp_slewrate();
+	}
+
+	/* special velocity setpoint limitation for smooth takeoff (after slewrate!) */
+	if (_in_smooth_takeoff) {
+		_in_smooth_takeoff = _takeoff_vel_limit < -_vel_sp(2);
+		/* ramp vertical velocity limit up to takeoff speed */
+		_takeoff_vel_limit += -_vel_sp(2) * _dt / _takeoff_ramp_time.get();
+		/* limit vertical velocity to the current ramp value */
+		_vel_sp(2) = math::max(_vel_sp(2), -_takeoff_vel_limit);
+	}
+
+	/* make sure velocity setpoint is constrained in all directions (xyz) */
+	float vel_norm_xy = sqrtf(_vel_sp(0) * _vel_sp(0) + _vel_sp(1) * _vel_sp(1));
+
+	if (vel_norm_xy > _vel_max_xy) {
+		_vel_sp(0) = _vel_sp(0) * _vel_max_xy / vel_norm_xy;
+		_vel_sp(1) = _vel_sp(1) * _vel_max_xy / vel_norm_xy;
+	}
+
+	_vel_sp(2) = math::constrain(_vel_sp(2), -_params.vel_max_up, _params.vel_max_down);
+
+	_vel_sp_prev = _vel_sp;
+}
+
 
 }
 
