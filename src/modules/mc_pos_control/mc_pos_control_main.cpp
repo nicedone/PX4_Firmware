@@ -4263,15 +4263,29 @@ MulticopterPositionControl::task_main()
 
 		update_velocity_derivative();
 
-		/* generate sepoints
-		 * pos_sp
-		 * vel_sp
-		 * acc_sp
-		 * yaw_sp
-		 * yaw_speed_sp
-		 */
+		/* by default, run position/altitude controller. the control_* functions
+		 * can disable this and run velocity controllers directly in this cycle */
+		_run_pos_control = true;
+		_run_alt_control = true;
+
+		// reset the horizontal and vertical position hold flags for non-manual modes
+		// or if position / altitude is not controlled
+		if (!_control_mode.flag_control_position_enabled || !_control_mode.flag_control_manual_enabled) {
+			_pos_hold_engaged = false;
+		}
+
+		if (!_control_mode.flag_control_altitude_enabled || !_control_mode.flag_control_manual_enabled) {
+			_alt_hold_engaged = false;
+		}
+
+		/* Generate mode specific setpoints
+		 * Manual: from stick
+		 * Auto: from Triplets through navigator
+		 * Offboard: from Triplets through mavlink */
 
 		if(_control_mode.flag_control_offboard_enabled ) {
+
+			_mode_auto = false;
 
 			generate_offboard_setpoints();
 
@@ -4279,12 +4293,36 @@ MulticopterPositionControl::task_main()
 
 			generate_manual_setpoints();
 
+			_mode_auto = false;
+
+			/* we set triplets to false
+			 * this ensures that when switching to auto, the position
+			 * controller will not use the old triplets but waits until triplets
+			 * have been updated */
+			_pos_sp_triplet.current.valid = false;
+			_pos_sp_triplet.previous.valid = false;
+
+			_hold_offboard_xy = false;
+			_hold_offboard_z = false;
+
 		} else if (_control_mode.flag_control_auto_enabled) {
+
+			_hold_offboard_xy = false;
+			_hold_offboard_z = false;
 
 			generate_auto_setpoints();
 
 		} else {
-			PX4_ERROR("Not recognized mode");
+			/* position controller disabled, reset setpoints */
+			_reset_pos_sp = true;
+			_reset_alt_sp = true;
+			_do_reset_alt_pos_flag = true;
+			_mode_auto = false;
+			_reset_int_z = true;
+			_reset_int_xy = true;
+
+			/* store last velocity in case a mode switch to position control occurs */
+			_vel_sp_prev = _vel;
 		}
 
 		// reset the horizontal and vertical position hold flags for non-manual modes
