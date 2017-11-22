@@ -281,6 +281,11 @@ private:
 	math::Vector<3> _vel_err_d;		/**< derivative of current velocity */
 	math::Vector<3> _curr_pos_sp;  /**< current setpoint of the triplets */
 	math::Vector<3> _prev_pos_sp; /**< previous setpoint of the triples */
+	matrix::Vector3f _thrust_sp{0,0,0};
+	float _throttle{0.0};
+	float _yaw_sp{0};
+	float _yaw_speed_sp{0};
+
 	matrix::Vector2f _stick_input_xy_prev; /**< for manual controlled mode to detect direction change */
 
 	math::Matrix<3, 3> _R;			/**< rotation matrix from attitude quaternions */
