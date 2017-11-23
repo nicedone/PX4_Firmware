@@ -4013,6 +4013,29 @@ void MulticopterPositionControl::velocity_controller() {
 			}
 		}
 
+		/* fill local position, velocity and thrust setpoint */
+		_local_pos_sp.timestamp = hrt_absolute_time();
+		_local_pos_sp.x = _pos_sp(0);
+		_local_pos_sp.y = _pos_sp(1);
+		_local_pos_sp.z = _pos_sp(2);
+		_local_pos_sp.yaw = _att_sp.yaw_body;
+		_local_pos_sp.vx = _vel_sp(0);
+		_local_pos_sp.vy = _vel_sp(1);
+		_local_pos_sp.vz = _vel_sp(2);
+		_local_pos_sp.acc_x = _thrust_sp(0) * CONSTANTS_ONE_G;
+		_local_pos_sp.acc_y = _thrust_sp(1) * CONSTANTS_ONE_G;
+		_local_pos_sp.acc_z = _thrust_sp(2) * CONSTANTS_ONE_G;
+
+		/* publish local position setpoint */
+		if (_local_pos_sp_pub != nullptr) {
+			orb_publish(ORB_ID(vehicle_local_position_setpoint),
+					_local_pos_sp_pub, &_local_pos_sp);
+
+		} else {
+			_local_pos_sp_pub = orb_advertise(
+					ORB_ID(vehicle_local_position_setpoint), &_local_pos_sp);
+		}
+
 	} else {
 		_reset_int_z = true;
 	}
