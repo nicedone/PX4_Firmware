@@ -2963,7 +2963,7 @@ MulticopterPositionControl::generate_manual_setpoints()
 			const float yaw_offset_max = yaw_rate_max / _params.mc_att_yaw_p;
 
 			_yaw_speed_sp = _manual.r * yaw_rate_max;
-			float yaw_target = _wrap_pi(_yaw_sp + _yaw_sp * _dt);
+			float yaw_target = _wrap_pi(_yaw_sp + _yaw_speed_sp * _dt);
 			float yaw_offs = _wrap_pi(yaw_target - _yaw);
 
 			// If the yaw offset became too big for the system to track stop
@@ -3212,13 +3212,14 @@ MulticopterPositionControl::generate_auto_setpoints()
 			/* update yaw setpoint if needed */
 			if (_pos_sp_triplet.current.yawspeed_valid
 			    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_FOLLOW_TARGET) {
-				_att_sp.yaw_body = _att_sp.yaw_body + _pos_sp_triplet.current.yawspeed * _dt;
+				_yaw_speed_sp = _pos_sp_triplet.current.yawspeed;
+				_yaw_sp = _yaw_sp + _yaw_speed_sp * _dt;
 
 			} else if (PX4_ISFINITE(_pos_sp_triplet.current.yaw)) {
-				_att_sp.yaw_body = _pos_sp_triplet.current.yaw;
+				_yaw_sp = _pos_sp_triplet.current.yaw;
 			}
 
-			float yaw_diff = _wrap_pi(_att_sp.yaw_body - _yaw);
+			float yaw_diff = _wrap_pi(_yaw_sp - _yaw);
 
 			/* only follow previous-current-line for specific triplet type */
 			if (_pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_POSITION  ||
@@ -3754,7 +3755,6 @@ void MulticopterPositionControl::position_controller() {
 	_vel_sp_prev = _vel_sp;
 }
 
-
 void MulticopterPositionControl::velocity_controller() {
 
 	if (_control_mode.flag_control_climb_rate_enabled
@@ -3816,7 +3816,8 @@ void MulticopterPositionControl::velocity_controller() {
 				 * frame to consider uneven ground */
 
 				/* thrust setpoint in body frame*/
-				math::Vector < 3 > thrust_sp_body = _R.transposed() * _thrust_sp;
+				math::Vector < 3 > thrust_sp_body = _R.transposed()
+						* _thrust_sp;
 
 				/* we dont want to make any correction in body x and y*/
 				thrust_sp_body(0) = 0.0f;
@@ -3980,9 +3981,8 @@ void MulticopterPositionControl::velocity_controller() {
 		}
 
 		/* if any of the thrust setpoint is bogus, send out a warning */
-		if (!PX4_ISFINITE(
-				_thrust_sp(0)) || !PX4_ISFINITE(_thrust_sp(1)) ||
-				!PX4_ISFINITE(_thrust_sp(2))) {
+		if (!PX4_ISFINITE(_thrust_sp(0)) || !PX4_ISFINITE(_thrust_sp(1)) ||
+		!PX4_ISFINITE(_thrust_sp(2))) {
 			warn_rate_limited("Thrust setpoint not finite");
 		}
 
@@ -3998,7 +3998,6 @@ void MulticopterPositionControl::velocity_controller() {
 			_thrust_int(2) += vel_err(2) * _params.vel_i(2) * _dt;
 		}
 
-
 		if (_control_mode.flag_control_manual_enabled
 				&& _control_mode.flag_control_attitude_enabled) {
 
@@ -4009,8 +4008,7 @@ void MulticopterPositionControl::velocity_controller() {
 
 				/* enforce minimum throttle if not landed */
 				if (!_vehicle_land_detected.landed) {
-					_throttle = math::max(_throttle,
-							_manual_thr_min.get());
+					_throttle = math::max(_throttle, _manual_thr_min.get());
 				}
 			}
 		}
