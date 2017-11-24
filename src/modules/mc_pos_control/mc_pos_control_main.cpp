@@ -1577,8 +1577,7 @@ MulticopterPositionControl::generate_manual_setpoints()
 			_yaw_sp = _yaw;
 
 		} else if (!_vehicle_land_detected.landed
-			   && !(!_control_mode.flag_control_altitude_enabled
-				&& _manual.z < 0.1f)) {
+			   && (_manual.z >= 0.1f)) {
 
 			/* do not move yaw while sitting on the ground */
 
@@ -2626,20 +2625,6 @@ void MulticopterPositionControl::velocity_controller()
 			_thrust_int(2) += vel_err(2) * _params.vel_i(2) * _dt;
 		}
 
-		if (_control_mode.flag_control_manual_enabled
-		    && _control_mode.flag_control_attitude_enabled) {
-
-			/* control throttle directly if no climb rate controller is active */
-			if (!_control_mode.flag_control_climb_rate_enabled) {
-				float thr_val = throttle_curve(_manual.z, _params.thr_hover);
-				_throttle = math::min(thr_val, _manual_thr_max.get());
-
-				/* enforce minimum throttle if not landed */
-				if (!_vehicle_land_detected.landed) {
-					_throttle = math::max(_throttle, _manual_thr_min.get());
-				}
-			}
-		}
 
 		/* fill local position, velocity and thrust setpoint */
 		_local_pos_sp.timestamp = hrt_absolute_time();
@@ -2663,6 +2648,20 @@ void MulticopterPositionControl::velocity_controller()
 			_local_pos_sp_pub = orb_advertise(
 						    ORB_ID(vehicle_local_position_setpoint), &_local_pos_sp);
 		}
+
+	} else if (_control_mode.flag_control_attitude_enabled) {
+
+		/* control throttle directly if no climb rate controller is active */
+		if (!_control_mode.flag_control_climb_rate_enabled) {
+			float thr_val = throttle_curve(_manual.z, _params.thr_hover);
+			_throttle = math::min(thr_val, _manual_thr_max.get());
+
+			/* enforce minimum throttle if not landed */
+			if (!_vehicle_land_detected.landed) {
+				_throttle = math::max(_throttle, _manual_thr_min.get());
+			}
+		}
+
 
 	} else {
 		_reset_int_z = true;
@@ -2726,7 +2725,7 @@ MulticopterPositionControl::generate_attitude_setpoint()
 		// update the setpoints
 		_att_sp.roll_body = euler_sp(0);
 		_att_sp.pitch_body = euler_sp(1);
-		_att_sp.yaw_body += euler_sp(2);
+		_att_sp.yaw_body = _yaw_sp + euler_sp(2);
 
 		/* only if optimal recovery is not used, modify roll/pitch */
 		if (!(_vehicle_status.is_vtol && _params.opt_recover)) {
