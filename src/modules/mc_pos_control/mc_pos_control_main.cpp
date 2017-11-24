@@ -370,6 +370,8 @@ private:
 	void generate_manual_z_setpoints();
 	float get_manual_yaw_setpoint(float yaw_sp, const float yaw);
 	void generate_attitude();
+	matrix::Vector3f get_stick_roll_pitch_yaw();
+
 
 	float get_cruising_speed_xy();
 
@@ -2760,13 +2762,17 @@ MulticopterPositionControl::get_manual_yaw_setpoint(float yaw_sp, const float ya
 void
 MulticopterPositionControl::generate_manual_attitude()
 {
+matrix::Vector3f
+MulticopterPositionControl::get_stick_roll_pitch_yaw()
+{
+
 	/* control roll, pitch yaw directly if no aiding velocity controller is active */
 
 	/*
 	 * Input mapping for roll & pitch setpoints
 	 * ----------------------------------------
 	 * This simplest thing to do is map the y & x inputs directly to roll and pitch, and scale according to the max
-	 * tilt angle.
+	 * tilt angle.en
 	 * But this has several issues:
 	 * - The maximum tilt angle cannot easily be restricted. By limiting the roll and pitch separately,
 	 *   it would be possible to get to a higher tilt angle by combining roll and pitch (the difference is
@@ -2804,23 +2810,21 @@ MulticopterPositionControl::generate_manual_attitude()
 	matrix::Eulerf euler_sp = q_sp_rpy;
 	// Since the yaw setpoint is integrated, we extract the offset here,
 	// so that we can remove it before the next iteration
+
+	// yaw setpoint is integrated over time, but we don't want to integrate the offset's
+	_yaw_sp -= _man_yaw_offset;
 	_man_yaw_offset = euler_sp(2);
 
-	generate_manual_yaw_setpoint();
+	matrix::Vector3f rpy;
 
-	/* control throttle directly if no climb rate controller is active */
-	float thr_val = throttle_curve(_manual.z, _params.thr_hover);
-	_throttle = math::min(thr_val, _manual_thr_max.get());
-
-	/* enforce minimum throttle if not landed */
-	if (!_vehicle_land_detected.landed) {
-		_throttle = math::max(_throttle, _manual_thr_min.get());
+	if (!_vehicle_land_detected.landed && (_manual.z >= 0.1f)) {
+		rpy(2) = get_manual_yaw_setpoint(_yaw_sp, _yaw);
 	}
 
 	// update the setpoints
-	_att_sp.roll_body = euler_sp(0);
-	_att_sp.pitch_body = euler_sp(1);
-	_att_sp.yaw_body = _yaw_sp + euler_sp(2);
+	rpy(0) = euler_sp(0);
+	rpy(1) = euler_sp(1);
+	rpy(2) = rpy(2) + euler_sp(2);
 
 	/* only if optimal recovery is not used, modify roll/pitch */
 	if (!(_vehicle_status.is_vtol && _params.opt_recover)) {
@@ -2836,13 +2840,13 @@ MulticopterPositionControl::generate_manual_attitude()
 		// - look at the roll and pitch angles: they should stay pretty much the same as when not yawing
 
 		// calculate our current yaw error
-		float yaw_error = _wrap_pi(_att_sp.yaw_body - _yaw);
+		float yaw_error = _wrap_pi(rpy(2) - _yaw);
 
 		// compute the vector obtained by rotating a z unit vector by the rotation
 		// given by the roll and pitch commands of the user
 		math::Vector<3> zB = {0, 0, 1};
 		math::Matrix < 3, 3 > R_sp_roll_pitch;
-		R_sp_roll_pitch.from_euler(_att_sp.roll_body, _att_sp.pitch_body, 0);
+		R_sp_roll_pitch.from_euler(rpy(0), rpy(1), 0);
 		math::Vector < 3 > z_roll_pitch_sp = R_sp_roll_pitch * zB;
 
 		// transform the vector into a new frame which is rotated around the z axis
@@ -2855,9 +2859,12 @@ MulticopterPositionControl::generate_manual_attitude()
 		// use the formula z_roll_pitch_sp = R_tilt * [0;0;1]
 		// R_tilt is computed from_euler; only true if cos(roll) not equal zero
 		// -> valid if roll is not +-pi/2;
-		_att_sp.roll_body = -asinf(z_roll_pitch_sp(1));
-		_att_sp.pitch_body = atan2f(z_roll_pitch_sp(0), z_roll_pitch_sp(2));
+		rpy(0) = -asinf(z_roll_pitch_sp(1));
+		rpy(1) = atan2f(z_roll_pitch_sp(0), z_roll_pitch_sp(2));
 	}
+
+	return rpy;
+
 
 	/* copy quaternion setpoint to attitude setpoint topic */
 	matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body,
