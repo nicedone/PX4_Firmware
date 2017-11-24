@@ -195,6 +195,17 @@ private:
 		deceleration
 	};
 
+	enum class Flighttask {
+		manual_pure,
+		manual_altitude,
+		manual_position,
+		autonomous,
+		offboard_position,
+		offboard_altitude
+	};
+
+	Flighttask _flighttask{Flighttask::manual_pure};
+
 	manual_stick_input _user_intention_xy; /**< defines what the user intends to do derived from the stick input */
 	manual_stick_input
 	_user_intention_z; /**< defines what the user intends to do derived from the stick input in z direciton */
@@ -751,6 +762,29 @@ MulticopterPositionControl::poll_subscriptions()
 
 	if (updated) {
 		orb_copy(ORB_ID(vehicle_control_mode), _control_mode_sub, &_control_mode);
+	}
+
+
+	if (_control_mode.flag_control_manual_enabled) {
+
+		if (_control_mode.flag_control_position_enabled && _control_mode.flag_control_altitude_enabled) {
+			_flighttask = Flighttask::manual_position;
+
+		} else if (_control_mode.flag_control_altitude_enabled) {
+			_flighttask = Flighttask::manual_altitude;
+
+		} else if (_control_mode.flag_control_attitude_enabled) {
+			_flighttask = Flighttask::manual_pure;
+		}
+
+	} else if (_control_mode.flag_control_auto_enabled) {
+		_flighttask = Flighttask::autonomous;
+
+	} else if (_control_mode.flag_control_offboard_enabled) {
+
+	} else {
+
+		PX4_ERR("Current task not supported");
 	}
 
 	orb_check(_manual_sub, &updated);
@@ -3059,6 +3093,16 @@ MulticopterPositionControl::task_main()
 		 * Manual: from stick
 		 * Auto: from Triplets through navigator
 		 * Offboard: from Triplets through mavlink */
+
+		switch (_flighttask) {
+		case Flighttask::manual_pure:
+		case Flighttask::manual_altitude:
+		case Flighttask::manual_position:
+		case Flighttask::autonomous:
+		case Flighttask::offboard_altitude:
+		case Flighttask::offboard_position:
+			break;
+		}
 
 		if (_control_mode.flag_control_offboard_enabled) {
 
