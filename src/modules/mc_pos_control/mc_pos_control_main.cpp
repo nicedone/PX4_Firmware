@@ -366,6 +366,7 @@ private:
 	void position_controller();
 	void velocity_controller();
 	void generate_attitude_setpoint();
+	void generate_manual_attitude();
 	void generate_manual_yaw_setpoint();
 
 	float get_cruising_speed_xy();
@@ -2731,6 +2732,140 @@ void MulticopterPositionControl::generate_manual_yaw_setpoint()
 		_yaw_sp = _yaw;
 	}
 }
+void
+MulticopterPositionControl::generate_manual_attitude()
+{
+	/* control roll, pitch yaw directly if no aiding velocity controller is active */
+
+	/*
+	 * Input mapping for roll & pitch setpoints
+	 * ----------------------------------------
+	 * This simplest thing to do is map the y & x inputs directly to roll and pitch, and scale according to the max
+	 * tilt angle.
+	 * But this has several issues:
+	 * - The maximum tilt angle cannot easily be restricted. By limiting the roll and pitch separately,
+	 *   it would be possible to get to a higher tilt angle by combining roll and pitch (the difference is
+	 *   around 15 degrees maximum, so quite noticeable). Limiting this angle is not simple in roll-pitch-space,
+	 *   it requires to limit the tilt angle = acos(cos(roll) * cos(pitch)) in a meaningful way (eg. scaling both
+	 *   roll and pitch).
+	 * - Moving the stick diagonally, such that |x| = |y|, does not move the vehicle towards a 45 degrees angle.
+	 *   The direction angle towards the max tilt in the XY-plane is atan(1/cos(x)). Which means it even depends
+	 *   on the tilt angle (for a tilt angle of 35 degrees, it's off by about 5 degrees).
+	 *
+	 * So instead we control the following 2 angles:
+	 * - tilt angle, given by sqrt(x*x + y*y)
+	 * - the direction of the maximum tilt in the XY-plane, which also defines the direction of the motion
+	 *
+	 * This allows a simple limitation of the tilt angle, the vehicle flies towards the direction that the stick
+	 * points to, and changes of the stick input are linear.
+	 */
+	const float x = _manual.x * _params.man_tilt_max;
+	const float y = _manual.y * _params.man_tilt_max;
+
+	// we want to fly towards the direction of (x, y), so we use a perpendicular axis angle vector in the XY-plane
+	matrix::Vector2f v = matrix::Vector2f(y, -x);
+	float v_norm = v.norm(); // the norm of v defines the tilt angle
+
+	if (v_norm > _params.man_tilt_max) { // limit to the configured maximum tilt angle
+		v *= _params.man_tilt_max / v_norm;
+	}
+
+	matrix::Quatf q_sp_rpy = matrix::AxisAnglef(v(0), v(1), 0.f);
+	// The axis angle can change the yaw as well (but only at higher tilt angles. Note: we're talking
+	// about the world frame here, in terms of body frame the yaw rate will be unaffected).
+	// This the the formula by how much the yaw changes:
+	//   let a := tilt angle, b := atan(y/x) (direction of maximum tilt)
+	//   yaw = atan(-2 * sin(b) * cos(b) * sin^2(a/2) / (1 - 2 * cos^2(b) * sin^2(a/2))).
+	matrix::Eulerf euler_sp = q_sp_rpy;
+	// Since the yaw setpoint is integrated, we extract the offset here,
+	// so that we can remove it before the next iteration
+	_man_yaw_offset = euler_sp(2);
+
+	generate_manual_yaw_setpoint();
+
+	/* control throttle directly if no climb rate controller is active */
+	float thr_val = throttle_curve(_manual.z, _params.thr_hover);
+	_throttle = math::min(thr_val, _manual_thr_max.get());
+
+	/* enforce minimum throttle if not landed */
+	if (!_vehicle_land_detected.landed) {
+		_throttle = math::max(_throttle, _manual_thr_min.get());
+	}
+
+	// update the setpoints
+	_att_sp.roll_body = euler_sp(0);
+	_att_sp.pitch_body = euler_sp(1);
+	_att_sp.yaw_body = _yaw_sp + euler_sp(2);
+
+	/* only if optimal recovery is not used, modify roll/pitch */
+	if (!(_vehicle_status.is_vtol && _params.opt_recover)) {
+		// construct attitude setpoint rotation matrix. modify the setpoints for roll
+		// and pitch such that they reflect the user's intention even if a yaw error
+		// (yaw_sp - yaw) is present. In the presence of a yaw error constructing a rotation matrix
+		// from the pure euler angle setpoints will lead to unexpected attitude behaviour from
+		// the user's view as the euler angle sequence uses the  yaw setpoint and not the current
+		// heading of the vehicle.
+		// The effect of that can be seen with:
+		// - roll/pitch into one direction, keep it fixed (at high angle)
+		// - apply a fast yaw rotation
+		// - look at the roll and pitch angles: they should stay pretty much the same as when not yawing
+
+		// calculate our current yaw error
+		float yaw_error = _wrap_pi(_att_sp.yaw_body - _yaw);
+
+		// compute the vector obtained by rotating a z unit vector by the rotation
+		// given by the roll and pitch commands of the user
+		math::Vector<3> zB = {0, 0, 1};
+		math::Matrix < 3, 3 > R_sp_roll_pitch;
+		R_sp_roll_pitch.from_euler(_att_sp.roll_body, _att_sp.pitch_body, 0);
+		math::Vector < 3 > z_roll_pitch_sp = R_sp_roll_pitch * zB;
+
+		// transform the vector into a new frame which is rotated around the z axis
+		// by the current yaw error. this vector defines the desired tilt when we look
+		// into the direction of the desired heading
+		math::Matrix < 3, 3 > R_yaw_correction;
+		R_yaw_correction.from_euler(0.0f, 0.0f, -yaw_error);
+		z_roll_pitch_sp = R_yaw_correction * z_roll_pitch_sp;
+
+		// use the formula z_roll_pitch_sp = R_tilt * [0;0;1]
+		// R_tilt is computed from_euler; only true if cos(roll) not equal zero
+		// -> valid if roll is not +-pi/2;
+		_att_sp.roll_body = -asinf(z_roll_pitch_sp(1));
+		_att_sp.pitch_body = atan2f(z_roll_pitch_sp(0), z_roll_pitch_sp(2));
+	}
+
+	/* copy quaternion setpoint to attitude setpoint topic */
+	matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body,
+					    _att_sp.yaw_body);
+	q_sp.copyTo(_att_sp.q_d);
+	_att_sp.q_d_valid = true;
+
+	/* fill and publish att_sp message */
+	_att_sp.thrust = _throttle;
+	_att_sp.timestamp = hrt_absolute_time();
+
+	/* publish attitude setpoint
+	 * Do not publish if
+	 * - offboard is enabled but position/velocity/accel control is disabled,
+	 * in this case the attitude setpoint is published by the mavlink app.
+	 * - if the vehicle is a VTOL and it's just doing a transition (the VTOL attitude control module will generate
+	 * attitude setpoints for the transition).
+	 * - if not armed
+	 */
+	if (_control_mode.flag_armed
+	    && (!(_control_mode.flag_control_offboard_enabled
+		  && !(_control_mode.flag_control_position_enabled
+		       || _control_mode.flag_control_velocity_enabled
+		       || _control_mode.flag_control_acceleration_enabled)))) {
+
+		if (_att_sp_pub != nullptr) {
+			orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);
+
+		} else if (_attitude_setpoint_id) {
+			_att_sp_pub = orb_advertise(_attitude_setpoint_id, &_att_sp);
+		}
+	}
+}
 
 void
 MulticopterPositionControl::generate_attitude_setpoint()
@@ -3125,7 +3260,11 @@ MulticopterPositionControl::task_main()
 		 * Offboard: from Triplets through mavlink */
 
 		switch (_flighttask) {
-		case Flighttask::manual_pure:
+		case Flighttask::manual_pure: {
+				generate_manual_attitude();
+				break;
+			}
+
 		case Flighttask::manual_altitude:
 		case Flighttask::manual_position:
 		case Flighttask::autonomous:
