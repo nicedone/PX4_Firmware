@@ -3067,6 +3067,110 @@ MulticopterPositionControl::generate_manual_attitude()
 	}
 }
 
+void MulticopterPositionControl::generate_attitude()
+{
+	if (_flighttask == Flighttask::manual_altitude) {
+
+		/* we fuse setpoints */
+		matrix::Vector3f rpy = get_stick_roll_pitch_yaw();
+		_att_sp.roll_body = rpy(0);
+		_att_sp.pitch_body = rpy(1);
+		_att_sp.yaw_body = rpy(2);
+		_yaw_sp = _att_sp.yaw_body;
+
+	} else {
+		_att_sp.yaw_body = _yaw_sp;
+		_att_sp.yaw_sp_move_rate = _yaw_speed_sp;
+
+		/* desired body_z axis = -normalize(thrust_vector) */
+		math::Vector < 3 > body_x;
+		math::Vector < 3 > body_y;
+		math::Vector < 3 > body_z;
+
+		if (_thrust_sp.length() > SIGMA_NORM) {
+			body_z = -_thrust_sp.normalized();
+
+		} else {
+			/* no thrust, set Z axis to safe value */
+			body_z.zero();
+			body_z(2) = 1.0f;
+		}
+
+		/* vector of desired yaw direction in XY plane, rotated by PI/2 */
+		math::Vector < 3
+		> y_C(-sinf(_att_sp.yaw_body), cosf(_att_sp.yaw_body), 0.0f);
+
+		if (fabsf(body_z(2)) > SIGMA_SINGLE_OP) {
+			/* desired body_x axis, orthogonal to body_z */
+			body_x = y_C % body_z;
+
+			/* keep nose to front while inverted upside down */
+			if (body_z(2) < 0.0f) {
+				body_x = -body_x;
+			}
+
+			body_x.normalize();
+
+		} else {
+			/* desired thrust is in XY plane, set X downside to construct correct matrix,
+			 * but yaw component will not be used actually */
+			body_x.zero();
+			body_x(2) = 1.0f;
+		}
+
+		/* desired body_y axis */
+		body_y = body_z % body_x;
+
+		/* fill rotation matrix */
+		for (int i = 0; i < 3; i++) {
+			_R_setpoint(i, 0) = body_x(i);
+			_R_setpoint(i, 1) = body_y(i);
+			_R_setpoint(i, 2) = body_z(i);
+		}
+
+		/* copy quaternion setpoint to attitude setpoint topic */
+		matrix::Quatf q_sp = _R_setpoint;
+		q_sp.copyTo(_att_sp.q_d);
+		_att_sp.q_d_valid = true;
+
+		/* calculate euler angles, for logging only, must not be used for control */
+		matrix::Eulerf euler = _R_setpoint;
+		_att_sp.roll_body = euler(0);
+		_att_sp.pitch_body = euler(1);
+		/* yaw already used to construct rot matrix, but actual rotation matrix can have different yaw near singularity */
+
+	}
+
+
+	/* copy quaternion setpoint to attitude setpoint topic */
+	matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body,
+					    _att_sp.yaw_body);
+	q_sp.copyTo(_att_sp.q_d);
+	_att_sp.q_d_valid = true;
+
+	/* fill and publish att_sp message */
+	_att_sp.thrust = _throttle;
+	_att_sp.timestamp = hrt_absolute_time();
+
+	/* publish attitude setpoint
+	 * Do not publish if
+	 * - offboard is enabled but position/velocity/accel control is disabled,
+	 * in this case the attitude setpoint is published by the mavlink app.
+	 * - if the vehicle is a VTOL and it's just doing a transition (the VTOL attitude control module will generate
+	 * attitude setpoints for the transition).
+	 * - if not armed
+	 */
+
+	if (_att_sp_pub != nullptr) {
+		orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);
+
+	} else if (_attitude_setpoint_id) {
+		_att_sp_pub = orb_advertise(_attitude_setpoint_id, &_att_sp);
+	}
+
+
+}
+
 void
 MulticopterPositionControl::generate_attitude_setpoint()
 {
