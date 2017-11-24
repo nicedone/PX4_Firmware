@@ -3014,11 +3014,31 @@ MulticopterPositionControl::get_stick_roll_pitch_yaw()
 	return rpy;
 
 
+}
+void
+MulticopterPositionControl::generate_manual_attitude()
+{
+
+	matrix::Vector3f rpy = get_stick_roll_pitch_yaw();
+
+	_att_sp.roll_body = rpy(0);
+	_att_sp.pitch_body = rpy(1);
+	_att_sp.yaw_body = rpy(2);
+	_yaw_sp = _att_sp.yaw_body;
+
 	/* copy quaternion setpoint to attitude setpoint topic */
 	matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body,
 					    _att_sp.yaw_body);
 	q_sp.copyTo(_att_sp.q_d);
 	_att_sp.q_d_valid = true;
+
+	float thr_val = throttle_curve(_manual.z, _params.thr_hover);
+	_throttle = math::min(thr_val, _manual_thr_max.get());
+
+	/* enforce minimum throttle if not landed */
+	if (!_vehicle_land_detected.landed) {
+		_throttle = math::max(_throttle, _manual_thr_min.get());
+	}
 
 	/* fill and publish att_sp message */
 	_att_sp.thrust = _throttle;
