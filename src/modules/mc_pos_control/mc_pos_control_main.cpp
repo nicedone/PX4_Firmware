@@ -372,6 +372,8 @@ private:
 	void generate_attitude();
 	matrix::Vector3f get_stick_roll_pitch_yaw();
 
+	matrix::Vector3f get_stick_velocity();
+
 
 	float get_cruising_speed_xy();
 
@@ -2707,29 +2709,68 @@ void MulticopterPositionControl::velocity_controller()
 		_reset_int_z = true;
 	}
 }
-void MulticopterPositionControl::generate_manual_yaw_setpoint()
+
+matrix::Vector3f
+MulticopterPositionControl::get_stick_velocity()
 {
+	/*
+	 * Map from stick input to normalized velocity setpoints
+	 */
 
-	/* do not move yaw while sitting on the ground */
+	/* velocity setpoint commanded by user stick input */
+	matrix::Vector3f man_vel_sp;
 
-	if (!_vehicle_land_detected.landed && (_manual.z >= 0.1f)) {
+	/* set vertical velocity setpoint with throttle stick, remapping of manual.z [0,1] to up and down command [-1,1] */
+	man_vel_sp(2) = -math::expo_deadzone((_manual.z - 0.5f) * 2.f,
+					     _z_vel_man_expo.get(), _hold_dz.get());
 
-		/* we want to know the real constraint, and global overrides manual */
-		const float yaw_rate_max =
-			(_params.man_yaw_max < _params.global_yaw_max) ?
-			_params.man_yaw_max : _params.global_yaw_max;
-		const float yaw_offset_max = yaw_rate_max / _params.mc_att_yaw_p;
+	/* set horizontal velocity setpoint with roll/pitch stick */
+	man_vel_sp(0) = math::expo_deadzone(_manual.x, _xy_vel_man_expo.get(),
+					    _hold_dz.get());
+	man_vel_sp(1) = math::expo_deadzone(_manual.y, _xy_vel_man_expo.get(),
+					    _hold_dz.get());
 
-		_yaw_speed_sp = _manual.r * yaw_rate_max;
-		float yaw_target = _wrap_pi(_yaw_sp + _yaw_speed_sp * _dt);
-		float yaw_offs = _wrap_pi(yaw_target - _yaw);
+	const float man_vel_hor_length = ((matrix::Vector2f) man_vel_sp.slice<2, 1>(
+			0, 0)).length();
 
-		// If the yaw offset became too big for the system to track stop
-		// shifting it, only allow if it would make the offset smaller again.
-		if (fabsf(yaw_offs) < yaw_offset_max
-		    || (_yaw_speed_sp > 0 && yaw_offs < 0)
-		    || (_yaw_speed_sp < 0 && yaw_offs > 0)) {
-			_yaw_sp = yaw_target;
+	/* saturate such that magnitude is never larger than 1 */
+	if (man_vel_hor_length > 1.0f) {
+		man_vel_sp(0) /= man_vel_hor_length;
+		man_vel_sp(1) /= man_vel_hor_length;
+	}
+
+	float yaw_sp = get_manual_yaw_setpoint(_yaw_sp, _yaw);
+
+	/* prepare yaw to rotate into NED frame */
+	float yaw_input_frame =
+		_control_mode.flag_control_fixed_hdg_enabled ?
+		_yaw_takeoff : yaw_sp;
+
+	/* setpoint in NED frame */
+	man_vel_sp = matrix::Dcmf(matrix::Eulerf(0.0f, 0.0f, yaw_input_frame))
+		     * man_vel_sp;
+
+	/* adjust acceleration based on stick input */
+	matrix::Vector2f stick_xy(man_vel_sp(0), man_vel_sp(1));
+	set_manual_acceleration_xy(stick_xy);
+	float stick_z = man_vel_sp(2);
+	float max_acc_z;
+	set_manual_acceleration_z(max_acc_z, stick_z);
+
+	/* prepare cruise speed (m/s) vector to scale the velocity setpoint */
+	float vel_mag =
+		(_velocity_hor_manual.get() < _vel_max_xy) ?
+		_velocity_hor_manual.get() : _vel_max_xy;
+	matrix::Vector3f vel_cruise_scale(vel_mag, vel_mag,
+					  (man_vel_sp(2) > 0.0f) ? _params.vel_max_down : _params.vel_max_up);
+	/* Setpoint scaled to cruise speed */
+	man_vel_sp = man_vel_sp.emult(vel_cruise_scale);
+
+	return man_vel_sp;
+
+}
+
+
 float
 MulticopterPositionControl::get_manual_yaw_setpoint(float yaw_sp, const float yaw)
 {
