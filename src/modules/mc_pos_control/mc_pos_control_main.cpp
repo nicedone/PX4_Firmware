@@ -368,6 +368,7 @@ private:
 	void generate_attitude_setpoint();
 	void generate_manual_attitude();
 	void generate_manual_z_setpoints();
+	void generate_manual_xyz_yaw_setpoints();
 	float get_manual_yaw_setpoint(float yaw_sp, const float yaw);
 	void generate_attitude();
 	matrix::Vector3f get_stick_roll_pitch_yaw();
@@ -2794,15 +2795,121 @@ MulticopterPositionControl::get_manual_yaw_setpoint(float yaw_sp, const float ya
 
 	return yaw_sp;
 }
+
+void
+MulticopterPositionControl::generate_manual_xyz_yaw_setpoints()
+{
+	matrix::Vector3f man_vel_sp = get_stick_velocity();
+	generate_manual_z_setpoints();
+	_yaw_sp = get_manual_yaw_setpoint(_yaw_sp, _yaw);
+
+	/* want to get/stay in position hold if user has xy stick in the middle (accounted for deadzone already) */
+	const bool pos_hold_desired = _control_mode.flag_control_position_enabled
+				      && (_user_intention_xy == brake);
+
+	/* check horizontal hold engaged flag */
+	if (_pos_hold_engaged) {
+
+		/* check if contition still true */
+		_pos_hold_engaged = pos_hold_desired;
+
+		/* use max acceleration */
+		if (_pos_hold_engaged) {
+			_acceleration_state_dependent_xy = _acceleration_hor_max.get();
 		}
 
 	} else {
-		_yaw_sp = _yaw;
+
+		/* check if we switch to pos_hold_engaged */
+		float vel_xy_mag = sqrtf(_vel(0) * _vel(0) + _vel(1) * _vel(1));
+		bool smooth_pos_transition = pos_hold_desired
+					     && (fabsf(
+							     _acceleration_hor_max.get()
+							     - _acceleration_state_dependent_xy)
+						 < FLT_EPSILON)
+					     && (_params.hold_max_xy < FLT_EPSILON
+						 || vel_xy_mag < _params.hold_max_xy);
+
+		/* during transition predict setpoint forward */
+		if (smooth_pos_transition) {
+
+			/* time to travel from current velocity to zero velocity */
+			float delta_t = sqrtf(_vel(0) * _vel(0) + _vel(1) * _vel(1))
+					/ _acceleration_hor_max.get();
+
+			/* p pos_sp in xy from max acceleration and current velocity */
+			math::Vector < 2 > pos(_pos(0), _pos(1));
+			math::Vector < 2 > vel(_vel(0), _vel(1));
+			math::Vector < 2 > pos_sp = pos + vel * delta_t
+						    - vel.normalized() * 0.5f * _acceleration_hor_max.get()
+						    * delta_t *delta_t;
+			_pos_sp(0) = pos_sp(0);
+			_pos_sp(1) = pos_sp(1);
+
+			_pos_hold_engaged = true;
+		}
 	}
+
+	if (!_pos_hold_engaged) {
+		_pos_sp(0) = _pos(0);
+		_pos_sp(1) = _pos(1);
+		_run_pos_control = false; /* request velocity setpoint to be used, instead of position setpoint */
+		_vel_sp(0) = man_vel_sp(0);
+		_vel_sp(1) = man_vel_sp(1);
+	}
+
+
 }
 void
-MulticopterPositionControl::generate_manual_attitude()
+MulticopterPositionControl::generate_manual_z_setpoints()
 {
+
+	matrix::Vector3f man_vel_sp = get_stick_velocity();
+
+	/* want to get/stay in altitude hold if user has z stick in the middle (accounted for deadzone already) */
+	const bool alt_hold_desired = _control_mode.flag_control_altitude_enabled
+				      && (_user_intention_z == brake);
+
+	/* check vertical hold engaged flag */
+	if (_alt_hold_engaged) {
+		_alt_hold_engaged = alt_hold_desired;
+
+	} else {
+
+		const float max_acc_z =
+			(man_vel_sp(2) <= 0.0f) ?
+			_acceleration_z_max_up.get() :
+			_acceleration_z_max_down.get();
+
+		/* check if we switch to alt_hold_engaged */
+		bool smooth_alt_transition = alt_hold_desired
+					     && ((max_acc_z - _acceleration_state_dependent_z) < FLT_EPSILON)
+					     && (_params.hold_max_z < FLT_EPSILON
+						 || fabsf(_vel(2)) < _params.hold_max_z);
+
+		/* during transition predict setpoint forward */
+		if (smooth_alt_transition) {
+
+			/* time to travel from current velocity to zero velocity */
+			const float delta_t = fabsf(_vel(2) / max_acc_z);
+
+			/* set desired postion setpoint assuming max acceleration */
+			_pos_sp(2) = _pos(2) + _vel(2) * delta_t
+				     + 0.5f * max_acc_z * delta_t *delta_t;
+
+			_alt_hold_engaged = true;
+		}
+	}
+
+	/* set requested velocity setpoints */
+	if (!_alt_hold_engaged) {
+		_pos_sp(2) = _pos(2);
+		_run_alt_control = false; /* request velocity setpoint to be used, instead of altitude setpoint */
+		_vel_sp(2) = man_vel_sp(2);
+	}
+
+}
+
 matrix::Vector3f
 MulticopterPositionControl::get_stick_roll_pitch_yaw()
 {
