@@ -366,6 +366,7 @@ private:
 	void position_controller();
 	void velocity_controller();
 	void generate_attitude_setpoint();
+	void generate_manual_yaw_setpoint();
 
 	float get_cruising_speed_xy();
 
@@ -2699,6 +2700,35 @@ void MulticopterPositionControl::velocity_controller()
 
 	} else {
 		_reset_int_z = true;
+	}
+}
+void MulticopterPositionControl::generate_manual_yaw_setpoint()
+{
+
+	/* do not move yaw while sitting on the ground */
+
+	if (!_vehicle_land_detected.landed && (_manual.z >= 0.1f)) {
+
+		/* we want to know the real constraint, and global overrides manual */
+		const float yaw_rate_max =
+			(_params.man_yaw_max < _params.global_yaw_max) ?
+			_params.man_yaw_max : _params.global_yaw_max;
+		const float yaw_offset_max = yaw_rate_max / _params.mc_att_yaw_p;
+
+		_yaw_speed_sp = _manual.r * yaw_rate_max;
+		float yaw_target = _wrap_pi(_yaw_sp + _yaw_speed_sp * _dt);
+		float yaw_offs = _wrap_pi(yaw_target - _yaw);
+
+		// If the yaw offset became too big for the system to track stop
+		// shifting it, only allow if it would make the offset smaller again.
+		if (fabsf(yaw_offs) < yaw_offset_max
+		    || (_yaw_speed_sp > 0 && yaw_offs < 0)
+		    || (_yaw_speed_sp < 0 && yaw_offs > 0)) {
+			_yaw_sp = yaw_target;
+		}
+
+	} else {
+		_yaw_sp = _yaw;
 	}
 }
 
