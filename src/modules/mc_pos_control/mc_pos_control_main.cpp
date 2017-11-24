@@ -376,6 +376,7 @@ private:
 	matrix::Vector3f get_stick_velocity();
 
 
+
 	float get_cruising_speed_xy();
 
 	bool in_auto_takeoff();
@@ -2705,7 +2706,6 @@ void MulticopterPositionControl::velocity_controller()
 			}
 		}
 
-
 	} else {
 		_reset_int_z = true;
 	}
@@ -3057,7 +3057,6 @@ MulticopterPositionControl::generate_manual_attitude()
 		  && !(_control_mode.flag_control_position_enabled
 		       || _control_mode.flag_control_velocity_enabled
 		       || _control_mode.flag_control_acceleration_enabled)))) {
-
 		if (_att_sp_pub != nullptr) {
 			orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);
 
@@ -3597,47 +3596,47 @@ MulticopterPositionControl::task_main()
 			break;
 		}
 
-		if (_control_mode.flag_control_offboard_enabled) {
-
-			_mode_auto = false;
-
-			generate_offboard_setpoints();
-
-		} else if (_control_mode.flag_control_manual_enabled) {
-
-			generate_manual_setpoints();
-
-			_mode_auto = false;
-
-			/* we set triplets to false
-			 * this ensures that when switching to auto, the position
-			 * controller will not use the old triplets but waits until triplets
-			 * have been updated */
-			_pos_sp_triplet.current.valid = false;
-			_pos_sp_triplet.previous.valid = false;
-
-			_hold_offboard_xy = false;
-			_hold_offboard_z = false;
-
-		} else if (_control_mode.flag_control_auto_enabled) {
-
-			_hold_offboard_xy = false;
-			_hold_offboard_z = false;
-
-			generate_auto_setpoints();
-
-		} else {
-			/* position controller disabled, reset setpoints */
-			_reset_pos_sp = true;
-			_reset_alt_sp = true;
-			_do_reset_alt_pos_flag = true;
-			_mode_auto = false;
-			_reset_int_z = true;
-			_reset_int_xy = true;
-
-			/* store last velocity in case a mode switch to position control occurs */
-			_vel_sp_prev = _vel;
-		}
+//		if (_control_mode.flag_control_offboard_enabled) {
+//
+//			_mode_auto = false;
+//
+//			generate_offboard_setpoints();
+//
+//		} else if (_control_mode.flag_control_manual_enabled) {
+//
+//			generate_manual_setpoints();
+//
+//			_mode_auto = false;
+//
+//			/* we set triplets to false
+//			 * this ensures that when switching to auto, the position
+//			 * controller will not use the old triplets but waits until triplets
+//			 * have been updated */
+//			_pos_sp_triplet.current.valid = false;
+//			_pos_sp_triplet.previous.valid = false;
+//
+//			_hold_offboard_xy = false;
+//			_hold_offboard_z = false;
+//
+//		} else if (_control_mode.flag_control_auto_enabled) {
+//
+//			_hold_offboard_xy = false;
+//			_hold_offboard_z = false;
+//
+//			generate_auto_setpoints();
+//
+//		} else {
+//			/* position controller disabled, reset setpoints */
+//			_reset_pos_sp = true;
+//			_reset_alt_sp = true;
+//			_do_reset_alt_pos_flag = true;
+//			_mode_auto = false;
+//			_reset_int_z = true;
+//			_reset_int_xy = true;
+//
+//			/* store last velocity in case a mode switch to position control occurs */
+//			_vel_sp_prev = _vel;
+//		}
 
 		/* Inputs: position setpoints and estimation
 		 * Outputs: velocity setpoints
@@ -3657,7 +3656,7 @@ MulticopterPositionControl::task_main()
 		/* Inputs: thrust setpoint
 		 * Output: attitude setpoint vector + throttle
 		 */
-		generate_attitude_setpoint();
+		//generate_attitude_setpoint();
 
 	}
 
