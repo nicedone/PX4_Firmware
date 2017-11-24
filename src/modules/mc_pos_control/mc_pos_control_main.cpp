@@ -3563,15 +3563,35 @@ MulticopterPositionControl::task_main()
 		 * Auto: from Triplets through navigator
 		 * Offboard: from Triplets through mavlink */
 
+		if (_flighttask == Flighttask::manual_pure) {
+
+			generate_manual_attitude();
+			/* pure manual is a special mode
+			 * where no position/velocity controller is required */
+			continue;
+		}
+
 		switch (_flighttask) {
 		case Flighttask::manual_pure: {
-				generate_manual_attitude();
+				PX4_ERR("Should never be in here");
 				break;
 			}
 
-		case Flighttask::manual_altitude:
-		case Flighttask::manual_position:
-		case Flighttask::autonomous:
+		case Flighttask::manual_altitude: {
+				generate_manual_z_setpoints();
+				break;
+			}
+
+		case Flighttask::manual_position: {
+				generate_manual_xyz_yaw_setpoints();
+				break;
+			}
+
+		case Flighttask::autonomous: {
+				generate_auto_setpoints();
+				break;
+			}
+
 		case Flighttask::offboard_altitude:
 		case Flighttask::offboard_position:
 			break;
@@ -3628,6 +3648,11 @@ MulticopterPositionControl::task_main()
 		 * Outputs: thrust Vector
 		 */
 		velocity_controller();
+
+		/* Inputs: thrust setpoint or manual roll, pitch, yaw
+		 * Output: attitude setpoint vector
+		 */
+		generate_attitude();
 
 		/* Inputs: thrust setpoint
 		 * Output: attitude setpoint vector + throttle
