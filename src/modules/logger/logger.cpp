@@ -598,6 +598,7 @@ void Logger::add_default_topics()
 	add_topic("offboard_mission");
 	add_topic("optical_flow", 50);
 	add_topic("position_setpoint_triplet", 200);
+	add_topic("rate_ctrl_status", 200);
 	add_topic("sensor_combined", 100);
 	add_topic("sensor_preflight", 200);
 	add_topic("system_power", 500);
