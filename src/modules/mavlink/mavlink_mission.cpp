@@ -1421,6 +1421,7 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 			break;
 
 		case MAV_CMD_DO_CHANGE_SPEED:
+		case MAV_CMD_DO_SET_HOME:
 		case MAV_CMD_DO_SET_SERVO:
 		case MAV_CMD_DO_LAND_START:
 		case MAV_CMD_DO_TRIGGER_CONTROL:
@@ -1494,6 +1495,7 @@ MavlinkMissionManager::format_mavlink_mission_item(const struct mission_item_s *
 			break;
 
 		case NAV_CMD_DO_CHANGE_SPEED:
+		case NAV_CMD_DO_SET_HOME:
 		case NAV_CMD_DO_SET_SERVO:
 		case NAV_CMD_DO_LAND_START:
 		case NAV_CMD_DO_TRIGGER_CONTROL:
