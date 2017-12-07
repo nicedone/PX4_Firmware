@@ -70,6 +70,10 @@ public:
 	virtual ~BlockStats() {}
 	void update(const matrix::Vector<Type, M> &u)
 	{
+		for (int i = 0; i < u.length(); i++) {
+			if (!PX4_ISFINITE(u(i))) { return; }
+		}
+
 		_sum += u;
 		_sumSq += u.emult(u);
 		_count += 1;
