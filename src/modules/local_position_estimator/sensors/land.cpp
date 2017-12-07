@@ -24,6 +24,14 @@ void BlockLocalPositionEstimator::landInit()
 		mavlink_and_console_log_info(&mavlink_log_pub, "[lpe] land init");
 		_sensorTimeout &= ~SENSOR_LAND;
 		_sensorFault &= ~SENSOR_LAND;
+
+		// if we have no absolute altitude measurement, initialize it to zero
+		if (!_altOriginInitialized
+		    && !(_fusion.get() & FUSE_GPS)
+		    && !(_fusion.get() & FUSE_BARO) && _fake_origin.get()) {
+			_altOriginInitialized = true;
+			_altOrigin = 0;
+		}
 	}
 }
 
