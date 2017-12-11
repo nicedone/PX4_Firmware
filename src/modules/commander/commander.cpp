@@ -1824,9 +1824,10 @@ int commander_thread_main(int argc, char *argv[])
 		arming_ret = TRANSITION_NOT_CHANGED;
 
 		/* update parameters */
-		orb_check(param_changed_sub, &updated);
+		bool params_updated = false;
+		orb_check(param_changed_sub, &params_updated);
 
-		if (updated || param_init_forced) {
+		if (params_updated || param_init_forced) {
 
 			/* parameters changed */
 			struct parameter_update_s param_changed;
@@ -3298,7 +3299,7 @@ int commander_thread_main(int argc, char *argv[])
 			commander_state_pub = orb_advertise(ORB_ID(commander_state), &internal_state);
 		}
 
-		arm_auth_update(now);
+		arm_auth_update(now, params_updated || param_init_forced);
 
 		usleep(COMMANDER_MONITORING_INTERVAL);
 	}
