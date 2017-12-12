@@ -37,8 +37,8 @@
  */
 
 #include "airspeed_calibration.h"
-#include <commander/calibration_messages.h>
-#include <commander/calibration_routines.h>
+#include "calibration_messages.h"
+#include "calibration_routines.h"
 
 #include <px4_defines.h>
 #include <px4_posix.h>

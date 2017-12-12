@@ -47,8 +47,6 @@
 #include <cmath>	// NAN
 
 /* commander module headers */
-#include "baro_calibration.h"
-#include "calibration_routines.h"
 #include "commander_helper.h"
 #include "arm_auth.h"
 #include "PreflightCheck.h"

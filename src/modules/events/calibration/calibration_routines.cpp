@@ -59,7 +59,6 @@
 
 #include "calibration_routines.h"
 #include "calibration_messages.h"
-#include "commander_helper.h"
 
 int sphere_fit_least_squares(const float x[], const float y[], const float z[],
 			     unsigned int size, unsigned int max_iterations, float delta, float *sphere_x, float *sphere_y, float *sphere_z,
@@ -759,7 +758,7 @@ calibrate_return calibrate_from_orientation(orb_advert_t *mavlink_log_pub,
 		/* inform user about already handled side */
 		if (side_data_collected[orient]) {
 			orientation_failures++;
-			set_tune(TONE_NOTIFY_NEGATIVE_TUNE);
+			//set_tune(TONE_NOTIFY_NEGATIVE_TUNE); // TODO: dagar fix
 			calibration_log_info(mavlink_log_pub, "[cal] %s side already completed", detect_orientation_str(orient));
 			usleep(20000);
 			continue;
@@ -787,10 +786,10 @@ calibrate_return calibrate_from_orientation(orb_advert_t *mavlink_log_pub,
 		side_data_collected[orient] = true;
 
 		// output neutral tune
-		set_tune(TONE_NOTIFY_NEUTRAL_TUNE);
+		//set_tune(TONE_NOTIFY_NEUTRAL_TUNE); // TODO: dagar fix
 
 		// temporary priority boost for the white blinking led to come trough
-		rgbled_set_color_and_mode(led_control_s::COLOR_WHITE, led_control_s::MODE_BLINK_FAST, 3, 1);
+		//rgbled_set_color_and_mode(led_control_s::COLOR_WHITE, led_control_s::MODE_BLINK_FAST, 3, 1); // TODO: dagar fix
 		usleep(200000);
 	}
 
@@ -815,12 +814,12 @@ static void calibrate_answer_command(orb_advert_t *mavlink_log_pub, struct vehic
 {
 	switch (result) {
 	case vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED:
-		tune_positive(true);
+		//tune_positive(true); // TODO: dagar fix
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_RESULT_DENIED:
 		mavlink_log_critical(mavlink_log_pub, "command denied during calibration: %u", cmd.command);
-		tune_negative(true);
+		//tune_negative(true); // TODO: dagar fix
 		break;
 
 	default:
@@ -842,12 +841,12 @@ bool calibrate_cancel_check(orb_advert_t *mavlink_log_pub, int cancel_sub)
 		// ignore internal commands, such as VEHICLE_CMD_DO_MOUNT_CONTROL from vmount
 		if (cmd.from_external) {
 			if (cmd.command == vehicle_command_s::VEHICLE_CMD_PREFLIGHT_CALIBRATION &&
-					(int)cmd.param1 == 0 &&
-					(int)cmd.param2 == 0 &&
-					(int)cmd.param3 == 0 &&
-					(int)cmd.param4 == 0 &&
-					(int)cmd.param5 == 0 &&
-					(int)cmd.param6 == 0) {
+			    (int)cmd.param1 == 0 &&
+			    (int)cmd.param2 == 0 &&
+			    (int)cmd.param3 == 0 &&
+			    (int)cmd.param4 == 0 &&
+			    (int)cmd.param5 == 0 &&
+			    (int)cmd.param6 == 0) {
 				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
 				mavlink_log_critical(mavlink_log_pub, CAL_QGC_CANCELLED_MSG);
 				return true;
