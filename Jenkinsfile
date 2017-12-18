@@ -1,5 +1,6 @@
 pipeline {
   agent none
+
   stages {
 
     stage('Builds') {
@@ -27,24 +28,13 @@ pipeline {
         stage('nuttx_gen') {
           steps {
             script {
+
               def builds = [:]
 
               // nuttx default targets that are archived and uploaded to s3
               for (def option in ["px4fmu-v4", "px4fmu-v4pro", "px4fmu-v5", "aerofc-v1"]) {
-                def node_name = "${option}"
-
-                builds["${node_name}"] = {
-                  node {
-                    stage("Build Test ${node_name}") {
-                      docker.image('px4io/px4-dev-nuttx:2017-10-23').inside('-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw') {
-                        stage("${node_name}") {
-                          checkout scm
-                          sh "echo ${node_name}"
-                        }
-                      }
-                    }
-                  }
-                }
+                def node_name = "nuttx_${option}_default"
+                builds[node_name] = getNodeForInstance('px4io/px4-dev-nuttx:2017-10-23', node_name)
               }
 
               parallel builds
@@ -228,5 +218,24 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
     timeout(time: 60, unit: 'MINUTES')
+  }
+}
+
+def getNodeForInstance(String docker_repo, String target) {
+  return {
+    node {
+      docker.image(docker_repo).inside('-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw') {
+        stage("${node_name}") {
+          checkout scm
+          sh('make clean')
+          sh('ccache -z')
+          sh('git fetch --tags')
+          sh('make ' + target)
+          sh('make sizes')
+          sh('ccache -s')
+          archiveArtifacts(artifacts: 'build/*/*.px4', fingerprint: true)
+        }
+      }
+    }
   }
 }
