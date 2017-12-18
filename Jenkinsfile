@@ -4,46 +4,15 @@ pipeline {
   stages {
 
     stage('Builds') {
-      parallel {
+      steps {
+        script {
+          def builds = [:]
 
+          builds["nuttx_px4fmu-v2_default"] = getNodeForInstance("px4io/px4-dev-nuttx:2017-10-23", "nuttx_px4fmu-v2_default")
 
-        stage('nuttx_1') {
-          agent {
-            docker { image 'px4io/px4-dev-base:2017-10-23' }
-          }
-          steps {
-            sh 'echo hello'
-          }
-        }
-
-        stage('nuttx_2') {
-          agent {
-            docker { image 'px4io/px4-dev-base:2017-10-23' }
-          }
-          steps {
-            sh 'echo hello'
-          }
-        }
-
-        stage('nuttx_gen') {
-          steps {
-            script {
-
-              def builds = [:]
-
-              // nuttx default targets that are archived and uploaded to s3
-              for (def option in ["px4fmu-v4", "px4fmu-v4pro", "px4fmu-v5", "aerofc-v1"]) {
-                def node_name = "nuttx_${option}_default"
-                builds[node_name] = getNodeForInstance('px4io/px4-dev-nuttx:2017-10-23', node_name)
-              }
-
-              parallel builds
-
-            } // script
-          }
-        }
-
-      } // parallel
+          parallel builds
+        } // script
+      }
     } // stage Builds
 
     stage('Test') {
