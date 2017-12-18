@@ -3,12 +3,21 @@ pipeline {
 
   stages {
 
-    stage('Builds') {
+    stage('Build') {
       steps {
         script {
           def builds = [:]
 
-          builds["nuttx_px4fmu-v2_default"] = getNodeForInstance("px4io/px4-dev-nuttx:2017-10-23", "nuttx_px4fmu-v2_default")
+          def docker_base = "px4io/px4-dev-base:2017-10-23"
+          def docker_nuttx = "px4io/px4-dev-nuttx:2017-10-23"
+
+          builds["px4fmu-v2_default"] = getNodeForInstance(docker_nuttx, "nuttx_px4fmu-v2_default")
+          builds["px4fmu-v2_rtps"] = getNodeForInstance(docker_nuttx, "nuttx_px4fmu-v2_rtps")
+          builds["px4fmu-v2_lpe"] = getNodeForInstance(docker_nuttx, "nuttx_px4fmu-v2_lpe")
+          builds["px4fmu-v3_default"] = getNodeForInstance(docker_nuttx, "nuttx_px4fmu-v3_default")
+          builds["px4fmu-v3_rtps"] = getNodeForInstance(docker_nuttx, "nuttx_px4fmu-v3_rtps")
+
+          builds["sitl_default"] = getNodeForInstance(docker_base, "posix_sitl_default")
 
           parallel builds
         } // script
@@ -194,7 +203,7 @@ def getNodeForInstance(String docker_repo, String target) {
   return {
     node {
       docker.image(docker_repo).inside('-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw') {
-        stage("${node_name}") {
+        stage(target) {
           checkout scm
           sh('make clean')
           sh('ccache -z')
