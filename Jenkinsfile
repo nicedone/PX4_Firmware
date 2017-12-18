@@ -2,62 +2,59 @@ pipeline {
   agent none
   stages {
 
-      stage('Builds') {
-        parallel {
+    stage('Builds') {
+      parallel {
 
 
-          stage('nuttx_1') {
-            agent {
-              docker { image 'px4io/px4-dev-base:2017-10-23' }
-            }
-            steps {
-              sh 'echo hello'
-            }
+        stage('nuttx_1') {
+          agent {
+            docker { image 'px4io/px4-dev-base:2017-10-23' }
           }
-
-          stage('nuttx_2') {
-            agent {
-              docker { image 'px4io/px4-dev-base:2017-10-23' }
-            }
-            steps {
-              sh 'echo hello'
-            }
+          steps {
+            sh 'echo hello'
           }
+        }
 
-          stage('nuttx_gen') {
-            steps {
-              script {
-                def builds = [:]
+        stage('nuttx_2') {
+          agent {
+            docker { image 'px4io/px4-dev-base:2017-10-23' }
+          }
+          steps {
+            sh 'echo hello'
+          }
+        }
 
-                // nuttx default targets that are archived and uploaded to s3
-                for (def option in ["px4fmu-v4", "px4fmu-v4pro", "px4fmu-v5", "aerofc-v1"]) {
-                  def node_name = "${option}"
+        stage('nuttx_gen') {
+          steps {
+            script {
+              def builds = [:]
 
-                  builds["${node_name}"] = {
-                    node {
-                      stage("Build Test ${node_name}") {
-                        docker.image('px4io/px4-dev-nuttx:2017-10-23').inside('-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw') {
-                          stage("${node_name}") {
-                            checkout scm
-                            sh "echo ${node_name}"
-                          }
+              // nuttx default targets that are archived and uploaded to s3
+              for (def option in ["px4fmu-v4", "px4fmu-v4pro", "px4fmu-v5", "aerofc-v1"]) {
+                def node_name = "${option}"
+
+                builds["${node_name}"] = {
+                  node {
+                    stage("Build Test ${node_name}") {
+                      docker.image('px4io/px4-dev-nuttx:2017-10-23').inside('-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw') {
+                        stage("${node_name}") {
+                          checkout scm
+                          sh "echo ${node_name}"
                         }
                       }
                     }
                   }
                 }
+              }
 
-                parallel builds
+              parallel builds
 
-              } // script
-            }
+            } // script
           }
+        }
 
-
-
-
-        } // parallel
-      } // stage Builds
+      } // parallel
+    } // stage Builds
 
     stage('Test') {
       parallel {
@@ -170,8 +167,8 @@ pipeline {
         //  }
         //}
 
-      }
-    }
+      } // parallel
+    } // stage Test
 
     stage('Generate Metadata') {
 
