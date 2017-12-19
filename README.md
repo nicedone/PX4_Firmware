@@ -1,12 +1,14 @@
 ## PX4 Pro Drone Autopilot ##
 
-[![Releases](https://img.shields.io/github/release/PX4/Firmware.svg)](https://github.com/PX4/Firmware/releases) [![DOI](https://zenodo.org/badge/22634/PX4/Firmware.svg)](https://zenodo.org/badge/latestdoi/22634/PX4/Firmware) [![Build Status](https://travis-ci.org/PX4/Firmware.svg?branch=master)](https://travis-ci.org/PX4/Firmware) [![Coverity Scan](https://scan.coverity.com/projects/3966/badge.svg?flat=1)](https://scan.coverity.com/projects/3966?tab=overview)
+[![Releases](https://img.shields.io/github/release/PX4/Firmware.svg)](https://github.com/PX4/Firmware/releases) [![DOI](https://zenodo.org/badge/22634/PX4/Firmware.svg)](https://zenodo.org/badge/latestdoi/22634/PX4/Firmware)
+
+[![Build Status](http://ci.px4.io:8080/buildStatus/icon?job=Firmware/master)](http://ci.px4.io:8080/blue/organizations/jenkins/Firmware/activity) [![Coverity Scan](https://scan.coverity.com/projects/3966/badge.svg?flat=1)](https://scan.coverity.com/projects/3966?tab=overview)
 
 [![Slack](https://px4-slack.herokuapp.com/badge.svg)](http://slack.px4.io)
 
 This repository holds the [PX4 Pro](http://px4.io) flight control solution for drones, with the main applications located in the [src/modules](https://github.com/PX4/Firmware/tree/master/src/modules) directory. It also contains the PX4 Drone Middleware Platform, which provides drivers and middleware to run drones.
 
-  * Official Website: http://px4.io (License: BSD 3-clause, [LICENSE.md](https://github.com/PX4/Firmware/blob/master/LICENSE.md))
+  * Official Website: http://px4.io (License: BSD 3-clause, [LICENSE](https://github.com/PX4/Firmware/blob/master/LICENSE))
   * Supported airframes:
     * [Multicopters](http://px4.io/portfolio_category/multicopter/)
     * [Fixed wing](http://px4.io/portfolio_category/plane/)
@@ -74,24 +76,24 @@ The PX4 Dev Team syncs up on a [weekly dev call](https://dev.px4.io/en/contribut
 ## Supported Hardware
 
 This repository contains code supporting these boards:
-  * [Snapdragon Flight](https://dev.px4.io/en/flight_controller/snapdragon_flight.html)
-  * [Intel Aero](https://dev.px4.io/en/flight_controller/intel_aero.html)
-  * [Raspberry PI with Navio 2](https://dev.px4.io/en/flight_controller/raspberry_pi.html)
+  * [Snapdragon Flight](https://docs.px4.io/en/flight_controller/snapdragon_flight.html)
+  * [Intel Aero](https://docs.px4.io/en/flight_controller/intel_aero.html)
+  * [Raspberry PI with Navio 2](https://docs.px4.io/en/flight_controller/raspberry_pi_navio2.html)
   * [Parrot Bebop 2](https://dev.px4.io/en/advanced/parrot_bebop.html)
   * FMUv2.x
-    * [Pixhawk](https://dev.px4.io/en/flight_controller/pixhawk.html)
-    * Pixhawk Mini
-    * [Pixfalcon](https://dev.px4.io/en/flight_controller/pixfalcon.html)
+    * [Pixhawk](https://docs.px4.io/en/flight_controller/pixhawk.html)
+    * [Pixhawk Mini](https://docs.px4.io/en/flight_controller/pixhawk_mini.html)
+    * [Pixfalcon](https://docs.px4.io/en/flight_controller/pixfalcon.html)
   * FMUv3.x [Pixhawk 2](https://pixhawk.org/modules/pixhawk2)
   * FMUv4.x
-    * [Pixracer](https://dev.px4.io/en/flight_controller/pixracer.html)
-    * Pixhawk 3 Pro
+    * [Pixracer](https://docs.px4.io/en/flight_controller/pixracer.html)
+    * [Pixhawk 3 Pro](https://docs.px4.io/en/flight_controller/pixhawk3_pro.html)
   * FMUv5.x (ARM Cortex M7, future Pixhawk)
-  * STM32F4Discovery (basic support) [Tutorial](https://pixhawk.org/modules/stm32f4discovery)
-  * Gumstix AeroCore (v1 and v2)
+  * [STM32F4Discovery](http://www.st.com/en/evaluation-tools/stm32f4discovery.html) (basic support) [Tutorial](https://pixhawk.org/modules/stm32f4discovery)
+  * [Gumstix AeroCore](https://www.gumstix.com/aerocore-2/) (only v2)
   * [Airmind MindPX V2.8](http://www.mindpx.net/assets/accessories/UserGuide_MindPX.pdf)
   * [Airmind MindRacer V1.2](http://mindpx.net/assets/accessories/mindracer_user_guide_v1.2.pdf)
-  * [Bitcraze Crazyflie 2.0](https://dev.px4.io/en/flight_controller/crazyflie2.html)
+  * [Bitcraze Crazyflie 2.0](https://docs.px4.io/en/flight_controller/crazyflie2.html)
 
 ## Project Milestones
 

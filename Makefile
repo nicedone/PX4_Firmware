@@ -218,7 +218,7 @@ check_rtps: \
 	check_posix_sitl_rtps \
 	sizes
 
-.PHONY: sizes check quick_check check_rtps
+.PHONY: sizes check quick_check check_rtps uorb_graphs
 
 sizes:
 	@-find build -name *.elf -type f | xargs size 2> /dev/null || :
@@ -234,6 +234,14 @@ check_%:
 	$(call colorecho,"Building" $(subst check_,,$@))
 	@$(MAKE) --no-print-directory $(subst check_,,$@)
 	@echo
+
+uorb_graphs:
+	@./Tools/uorb_graph/create_from_startupscript.sh
+	@./Tools/uorb_graph/create.py --src-path src --exclude-path src/examples --file Tools/uorb_graph/graph_full
+	@$(MAKE) --no-print-directory px4fmu-v2_default uorb_graph
+	@$(MAKE) --no-print-directory px4fmu-v4_default uorb_graph
+	@$(MAKE) --no-print-directory posix_sitl_default uorb_graph
+
 
 .PHONY: coverity_scan
 
@@ -255,37 +263,6 @@ module_documentation:
 	@python $(SRC_DIR)/Tools/px_process_module_doc.py -v --markdown $(SRC_DIR)/modules --src-path $(SRC_DIR)/src
 
 px4_metadata: parameters_metadata airframe_metadata module_documentation
-
-# S3 upload helpers
-# --------------------------------------------------------------------
-# s3cmd uses these ENV variables
-#  AWS_ACCESS_KEY_ID
-#  AWS_SECRET_ACCESS_KEY
-#  AWS_S3_BUCKET
-.PHONY: s3put_firmware s3put_qgc_firmware s3put_px4fmu_firmware s3put_misc_qgc_extra_firmware s3put_metadata s3put_scan-build s3put_cppcheck s3put_coverage
-
-s3put_qgc_firmware: s3put_px4fmu_firmware s3put_misc_qgc_extra_firmware
-
-s3put_px4fmu_firmware: px4fmu_firmware
-	@find $(SRC_DIR)/build -name "*.px4" -exec $(SRC_DIR)/Tools/s3put.sh "{}" \;
-
-s3put_misc_qgc_extra_firmware: misc_qgc_extra_firmware
-	@find $(SRC_DIR)/build -name "*.px4" -exec $(SRC_DIR)/Tools/s3put.sh "{}" \;
-
-s3put_metadata: px4_metadata
-	@$(SRC_DIR)/Tools/s3put.sh airframes.md
-	@$(SRC_DIR)/Tools/s3put.sh airframes.xml
-	@$(SRC_DIR)/Tools/s3put.sh parameters.xml
-	@$(SRC_DIR)/Tools/s3put.sh parameters.md
-
-s3put_scan-build: scan-build
-	@$(SRC_DIR)/Tools/s3put.sh `find $(SRC_DIR)/build/scan-build -mindepth 1 -maxdepth 1 -type d`/
-
-s3put_cppcheck: cppcheck
-	@$(SRC_DIR)/Tools/s3put.sh $(SRC_DIR)/build/cppcheck/
-
-s3put_coverage: tests_coverage
-	@$(SRC_DIR)/Tools/s3put.sh $(SRC_DIR)/build/posix_sitl_default/coverage-html/
 
 # Astyle
 # --------------------------------------------------------------------
@@ -320,9 +297,12 @@ tests_coverage:
 scan-build:
 	@export CCC_CC=clang
 	@export CCC_CXX=clang++
+	@rm -rf $(SRC_DIR)/build/posix_sitl_default-scan-build
+	@rm -rf $(SRC_DIR)/build/scan-build/report_latest
 	@mkdir -p $(SRC_DIR)/build/posix_sitl_default-scan-build
 	@cd $(SRC_DIR)/build/posix_sitl_default-scan-build && scan-build cmake $(SRC_DIR) -GNinja -DCONFIG=posix_sitl_default
 	@scan-build -o $(SRC_DIR)/build/scan-build cmake --build $(SRC_DIR)/build/posix_sitl_default-scan-build
+	@find $(SRC_DIR)/build/scan-build -maxdepth 1 -mindepth 1 -type d -exec cp -r "{}" $(SRC_DIR)/build/scan-build/report_latest \;
 
 posix_sitl_default-clang:
 	@mkdir -p $(SRC_DIR)/build/posix_sitl_default-clang
