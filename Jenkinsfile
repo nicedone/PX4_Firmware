@@ -332,6 +332,78 @@ pipeline {
           }
         }
 
+        stage('ROS Offboard') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
+        stage('ROS Mission Test 1') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
+        stage('ROS Mission Test 2') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
+        stage('ROS Mission Test 3') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
+        stage('ROS Mission Test 4') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
+        stage('ROS Mission Test 5') {
+          agent {
+            docker {
+              image 'px4io/px4-dev-base:2017-10-23'
+              args '-e CI=true -e CCACHE_BASEDIR=$WORKSPACE -e CCACHE_DIR=/tmp/ccache -v /tmp/ccache:/tmp/ccache:rw'
+            }
+          }
+          steps {
+            sh 'make clean'
+          }
+        }
+
         // temporarily disabled until stable
         //stage('tests coverage') {
         //  agent {
