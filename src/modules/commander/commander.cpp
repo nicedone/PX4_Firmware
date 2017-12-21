@@ -1261,11 +1261,6 @@ static bool commander_set_home_position(orb_advert_t &homePub, home_position_s &
 			return false;
 		}
 
-		//Ensure that the GPS accuracy is good enough for intializing home
-		if (globalPosition.eph > eph_threshold || globalPosition.epv > epv_threshold) {
-			return false;
-		}
-
 		// Set home position
 		home.lat = globalPosition.lat;
 		home.lon = globalPosition.lon;
@@ -3976,7 +3971,7 @@ check_posvel_validity(bool data_valid, float data_accuracy, float required_accur
 	}
 
 	// constrain probation times
-	if (land_detector.landed) {
+	if (land_detector.landed || (status.arming_state != vehicle_status_s::ARMING_STATE_ARMED)) {
 		*probation_time_us = POSVEL_PROBATION_MIN;
 	} else {
 		if (*probation_time_us < POSVEL_PROBATION_MIN) {
