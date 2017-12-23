@@ -394,6 +394,18 @@ PARAM_DEFINE_FLOAT(EKF2_MAG_NOISE, 5.0e-2f);
 PARAM_DEFINE_FLOAT(EKF2_EAS_NOISE, 1.4f);
 
 /**
+ * Gate size for synthetic sideslip fusion
+ *
+ * Sets the number of standard deviations used by the innovation consistency test.
+ *
+ * @group EKF2
+ * @min 1.0
+ * @unit SD
+ * @decimal 1
+ */
+PARAM_DEFINE_FLOAT(EKF2_BETA_GATE, 5.0f);
+
+/**
  * Noise for synthetic sideslip fusion.
  *
  * @group EKF2
@@ -552,16 +564,18 @@ PARAM_DEFINE_FLOAT(EKF2_TAS_GATE, 3.0f);
  * 3 : Set to true to enable vision position fusion
  * 4 : Set to true to enable vision yaw fusion
  * 5 : Set to true to enable multi-rotor drag specific force fusion
+ * 6 : set to true if the EV observations are in a non NED reference frame and need to be rotated before being used
  *
  * @group EKF2
  * @min 0
- * @max 63
+ * @max 127
  * @bit 0 use GPS
  * @bit 1 use optical flow
  * @bit 2 inhibit IMU bias estimation
  * @bit 3 vision position fusion
  * @bit 4 vision yaw fusion
  * @bit 5 multi-rotor drag fusion
+ * @bit 6 rotate external vision
  * @reboot_required true
  */
 PARAM_DEFINE_INT32(EKF2_AID_MASK, 1);

@@ -150,7 +150,8 @@ public:
 
 	const vehicle_roi_s &get_vroi() { return _vroi; }
 
-	bool home_position_valid() { return (_home_pos.timestamp > 0 && _home_pos.valid_hpos && _home_pos.valid_alt); }
+	bool home_alt_valid() { return (_home_pos.timestamp > 0 && _home_pos.valid_alt); }
+	bool home_position_valid() { return (_home_pos.timestamp > 0 && _home_pos.valid_alt && _home_pos.valid_hpos); }
 
 	int		get_onboard_mission_sub() { return _onboard_mission_sub; }
 	int		get_offboard_mission_sub() { return _offboard_mission_sub; }
@@ -233,7 +234,7 @@ public:
 
 	orb_advert_t	*get_mavlink_log_pub() { return &_mavlink_log_pub; }
 
-	void		increment_mission_instance_count() { _mission_instance_count++; }
+	void		increment_mission_instance_count() { _mission_result.instance_count++; }
 
 	void 		set_mission_failure(const char *reason);
 
@@ -289,8 +290,6 @@ private:
 	position_setpoint_triplet_s			_reposition_triplet{};	/**< triplet for non-mission direct position command */
 	position_setpoint_triplet_s			_takeoff_triplet{};	/**< triplet for non-mission direct takeoff command */
 	vehicle_roi_s					_vroi{};		/**< vehicle ROI */
-
-	int		_mission_instance_count{-1};	/**< instance count for the current mission */
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
 

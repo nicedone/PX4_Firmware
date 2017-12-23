@@ -331,7 +331,7 @@ transition_result_t arm_disarm(bool arm, orb_advert_t *mavlink_log_pub, const ch
 * @brief This function initializes the home position of the vehicle. This happens first time we get a good GPS fix and each
 *		 time the vehicle is armed with a good GPS fix.
 **/
-static void commander_set_home_position(orb_advert_t &homePub, home_position_s &home,
+static bool commander_set_home_position(orb_advert_t &homePub, home_position_s &home,
 					const vehicle_local_position_s &localPosition, const vehicle_global_position_s &globalPosition,
 					const vehicle_attitude_s &attitude,
 					bool set_alt_only_to_lpos_ref);
@@ -345,7 +345,7 @@ static void answer_command(struct vehicle_command_s &cmd, unsigned result,
 					orb_advert_t &command_ack_pub);
 
 /* publish vehicle status flags from the global variable status_flags*/
-static void publish_status_flags(orb_advert_t &vehicle_status_flags_pub);
+static void publish_status_flags(orb_advert_t &vehicle_status_flags_pub, vehicle_status_flags_s& vehicle_status_flags);
 
 
 static int power_button_state_notification_cb(board_power_button_state_notification_e request)
@@ -971,7 +971,8 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 
 					/* update home position on arming if at least 500 ms from commander start spent to avoid setting home on in-air restart */
 					if (cmd_arms && (arming_res == TRANSITION_CHANGED) &&
-						(hrt_absolute_time() > (commander_boot_timestamp + INAIR_RESTART_HOLDOFF_INTERVAL))) {
+						(hrt_absolute_time() > (commander_boot_timestamp + INAIR_RESTART_HOLDOFF_INTERVAL)) &&
+						!home->manual_home) {
 
 						commander_set_home_position(*home_pub, *home, *local_pos, *global_pos, *attitude, false);
 					}
@@ -1042,13 +1043,7 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 
 			if (use_current) {
 				/* use current position */
-				if (status_flags.condition_global_position_valid) {
-					home->lat = global_pos->lat;
-					home->lon = global_pos->lon;
-					home->alt = global_pos->alt;
-
-					home->timestamp = hrt_absolute_time();
-
+				if (commander_set_home_position(*home_pub, *home, *local_pos, *global_pos, *attitude, false)) {
 					cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
 
 				} else {
@@ -1056,29 +1051,50 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 				}
 
 			} else {
-				/* use specified position */
-				home->lat = cmd->param5;
-				home->lon = cmd->param6;
-				home->alt = cmd->param7;
+				const double lat = cmd->param5;
+				const double lon = cmd->param6;
+				const float alt = cmd->param7;
 
-				home->timestamp = hrt_absolute_time();
+				if (PX4_ISFINITE(lat) && PX4_ISFINITE(lon) && PX4_ISFINITE(alt)) {
 
-				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
-			}
+					if (local_pos->xy_global && local_pos->z_global) {
+						/* use specified position */
+						home->timestamp = hrt_absolute_time();
 
-			if (cmd_result == vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED) {
-				mavlink_and_console_log_info(&mavlink_log_pub, "Home position: %.7f, %.7f, %.2f", home->lat, home->lon, (double)home->alt);
+						home->lat = lat;
+						home->lon = lon;
+						home->alt = alt;
 
-				/* announce new home position */
-				if (*home_pub != nullptr) {
-					orb_publish(ORB_ID(home_position), *home_pub, home);
+						home->manual_home = true;
+						home->valid_alt = true;
+						home->valid_hpos = true;
+
+						// update local projection reference including altitude
+						struct map_projection_reference_s ref_pos;
+						map_projection_init(&ref_pos, local_pos->ref_lat, local_pos->ref_lon);
+						map_projection_project(&ref_pos, lat, lon, &home->x, &home->y);
+						home->z = -(alt - local_pos->ref_alt);
+
+						/* announce new home position */
+						if (*home_pub != nullptr) {
+							orb_publish(ORB_ID(home_position), *home_pub, home);
+
+						} else {
+							*home_pub = orb_advertise(ORB_ID(home_position), home);
+						}
+
+						/* mark home position as set */
+						status_flags.condition_home_position_valid = true;
+
+						cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+
+					} else {
+						cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
+					}
 
 				} else {
-					*home_pub = orb_advertise(ORB_ID(home_position), home);
+					cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_DENIED;
 				}
-
-				/* mark home position as set */
-				status_flags.condition_home_position_valid = true;
 			}
 		}
 		break;
@@ -1234,7 +1250,7 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 * @brief This function initializes the home position an altitude of the vehicle. This happens first time we get a good GPS fix and each
 *		 time the vehicle is armed with a good GPS fix.
 **/
-static void commander_set_home_position(orb_advert_t &homePub, home_position_s &home,
+static bool commander_set_home_position(orb_advert_t &homePub, home_position_s &home,
 					const vehicle_local_position_s &localPosition, const vehicle_global_position_s &globalPosition,
 					const vehicle_attitude_s &attitude,
 					bool set_alt_only_to_lpos_ref)
@@ -1242,16 +1258,15 @@ static void commander_set_home_position(orb_advert_t &homePub, home_position_s &
 	if (!set_alt_only_to_lpos_ref) {
 		//Need global and local position fix to be able to set home
 		if (!status_flags.condition_global_position_valid || !status_flags.condition_local_position_valid) {
-			return;
+			return false;
 		}
 
 		//Ensure that the GPS accuracy is good enough for intializing home
 		if (globalPosition.eph > eph_threshold || globalPosition.epv > epv_threshold) {
-			return;
+			return false;
 		}
 
-		//Set home position
-		home.timestamp = hrt_absolute_time();
+		// Set home position
 		home.lat = globalPosition.lat;
 		home.lon = globalPosition.lon;
 		home.valid_hpos = true;
@@ -1266,9 +1281,6 @@ static void commander_set_home_position(orb_advert_t &homePub, home_position_s &
 		matrix::Eulerf euler = matrix::Quatf(attitude.q);
 		home.yaw = euler.psi();
 
-		PX4_INFO("home: %.7f, %.7f, %.2f", home.lat, home.lon, (double)home.alt);
-
-
 		//Play tune first time we initialize HOME
 		if (!status_flags.condition_home_position_valid) {
 			tune_home_set(true);
@@ -1279,14 +1291,15 @@ static void commander_set_home_position(orb_advert_t &homePub, home_position_s &
 
 	} else if (!home.valid_alt && localPosition.z_global) {
 		// handle special case where we are setting only altitude using local position reference
-		home.timestamp = hrt_absolute_time();
 		home.alt = localPosition.ref_alt;
 		home.valid_alt = true;
-		PX4_INFO("home alt: %.2f", (double)home.alt);
 
 	} else {
-		return;
+		return false;
 	}
+
+	home.timestamp = hrt_absolute_time();
+	home.manual_home = false;
 
 	/* announce new home position */
 	if (homePub != nullptr) {
@@ -1295,6 +1308,8 @@ static void commander_set_home_position(orb_advert_t &homePub, home_position_s &
 	} else {
 		homePub = orb_advertise(ORB_ID(home_position), &home);
 	}
+
+	return true;
 }
 
 int commander_thread_main(int argc, char *argv[])
@@ -1528,6 +1543,7 @@ int commander_thread_main(int argc, char *argv[])
 
 	orb_advert_t commander_state_pub = nullptr;
 
+	vehicle_status_flags_s vehicle_status_flags = {};
 	orb_advert_t vehicle_status_flags_pub = nullptr;
 
 	if (dm_read(DM_KEY_MISSION_STATE, 0, &mission, sizeof(mission_s)) == sizeof(mission_s)) {
@@ -2032,7 +2048,9 @@ int commander_thread_main(int argc, char *argv[])
 					}
 
 					// Provide feedback on mission state
-					if (!_mission_result.valid && hotplug_timeout && _home.timestamp > 0) {
+					if ((_mission_result.timestamp > commander_boot_timestamp) && hotplug_timeout &&
+						(_mission_result.instance_count > 0) && !_mission_result.valid) {
+
 						mavlink_log_critical(&mavlink_log_pub, "Planned mission fails check. Please upload again.");
 					}
 				}
@@ -2204,7 +2222,7 @@ int commander_thread_main(int argc, char *argv[])
 
 		/* Check estimator status for signs of bad yaw induced post takeoff navigation failure
 		 * for a short time interval after takeoff. Fixed wing vehicles can recover using GPS heading,
-		 *  but rotary wing vehicles cannot so the position and velocity validity needs to be latched
+		 * but rotary wing vehicles cannot so the position and velocity validity needs to be latched
 		 * to false after failure to prevent flyaway crashes */
 		if (run_quality_checks && status.is_rotary_wing) {
 			bool estimator_status_updated = false;
@@ -3120,24 +3138,43 @@ int commander_thread_main(int argc, char *argv[])
 		/* Get current timestamp */
 		const hrt_abstime now = hrt_absolute_time();
 
-		/* First time home position update - but only if disarmed */
-		if (!status_flags.condition_home_position_valid && !armed.armed) {
-			commander_set_home_position(home_pub, _home, local_position, global_position, attitude, false);
-		}
+		// automaticcally set or update home position
+		if (!_home.manual_home) {
+			if (armed.armed) {
+				if ((!was_armed || (was_landed && !land_detector.landed)) &&
+					(now > commander_boot_timestamp + INAIR_RESTART_HOLDOFF_INTERVAL)) {
 
-		/* update home position on arming if at least 500 ms from commander start spent to avoid setting home on in-air restart */
-		else if (((!was_armed && armed.armed) || (was_landed && !land_detector.landed)) &&
-			(now > commander_boot_timestamp + INAIR_RESTART_HOLDOFF_INTERVAL)) {
-			commander_set_home_position(home_pub, _home, local_position, global_position, attitude, false);
+					/* update home position on arming if at least 500 ms from commander start spent to avoid setting home on in-air restart */
+					commander_set_home_position(home_pub, _home, local_position, global_position, attitude, false);
+				}
+			} else {
+				if (status_flags.condition_home_position_valid) {
+					if (land_detector.landed && local_position.xy_valid && local_position.z_valid) {
+						/* distance from home */
+						float home_dist_xy = -1.0f;
+						float home_dist_z = -1.0f;
+						mavlink_wpm_distance_to_point_local(_home.x, _home.y, _home.z, local_position.x, local_position.y,
+										   local_position.z, &home_dist_xy, &home_dist_z);
 
-		}
+						if (home_dist_xy > local_position.epv * 2 || home_dist_z > local_position.eph * 2) {
 
-		/* Set home position altitude to EKF origin height if home is not set and the EKF has a global origin.
-		 * This allows home atitude to be used in the calculation of height above takeoff location when GPS
-		 * use has commenced after takeoff. */
-		if (!_home.valid_alt && local_position.z_global) {
-			commander_set_home_position(home_pub, _home, local_position, global_position, attitude, true);
+							/* update when disarmed, landed and moved away from current home position */
+							commander_set_home_position(home_pub, _home, local_position, global_position, attitude, false);
+						}
+					}
+				} else {
+					/* First time home position update - but only if disarmed */
+					commander_set_home_position(home_pub, _home, local_position, global_position, attitude, false);
+				}
+			}
 
+			/* Set home position altitude to EKF origin height if home is not set and the EKF has a global origin.
+			 * This allows home atitude to be used in the calculation of height above takeoff location when GPS
+			 * use has commenced after takeoff. */
+			if (!_home.valid_alt && local_position.z_global) {
+				commander_set_home_position(home_pub, _home, local_position, global_position, attitude, true);
+
+			}
 		}
 
 		// check for arming state change
@@ -3188,7 +3225,7 @@ int commander_thread_main(int argc, char *argv[])
 			main_state_changed = false;
 		}
 
-		/* publish states (armed, control mode, vehicle status) at least with 5 Hz */
+		/* publish states (armed, control_mode, vehicle_status, commander_state, vehicle_status_flags) at least with 5 Hz */
 		if (counter % (200000 / COMMANDER_MONITORING_INTERVAL) == 0 || status_changed) {
 			set_control_mode();
 			control_mode.timestamp = now;
@@ -3212,6 +3249,17 @@ int commander_thread_main(int argc, char *argv[])
 				armed.prearmed = (hrt_elapsed_time(&commander_boot_timestamp) > 5 * 1000 * 1000);
 			}
 			orb_publish(ORB_ID(actuator_armed), armed_pub, &armed);
+
+			/* publish internal state for logging purposes */
+			if (commander_state_pub != nullptr) {
+				orb_publish(ORB_ID(commander_state), commander_state_pub, &internal_state);
+
+			} else {
+				commander_state_pub = orb_advertise(ORB_ID(commander_state), &internal_state);
+			}
+
+			/* publish vehicle_status_flags */
+			publish_status_flags(vehicle_status_flags_pub, vehicle_status_flags);
 		}
 
 		/* play arming and battery warning tunes */
@@ -3287,17 +3335,6 @@ int commander_thread_main(int argc, char *argv[])
 			have_taken_off_since_arming = false;
 		}
 
-		/* publish vehicle_status_flags */
-		publish_status_flags(vehicle_status_flags_pub);
-
-		/* publish internal state for logging purposes */
-		if (commander_state_pub != nullptr) {
-			orb_publish(ORB_ID(commander_state), commander_state_pub, &internal_state);
-
-		} else {
-			commander_state_pub = orb_advertise(ORB_ID(commander_state), &internal_state);
-		}
-
 		arm_auth_update(now);
 
 		usleep(COMMANDER_MONITORING_INTERVAL);
@@ -3328,6 +3365,7 @@ int commander_thread_main(int argc, char *argv[])
 	px4_close(param_changed_sub);
 	px4_close(battery_sub);
 	px4_close(land_detector_sub);
+	px4_close(estimator_status_sub);
 
 	thread_running = false;
 
@@ -4534,9 +4572,10 @@ void *commander_low_prio_loop(void *arg)
 	return nullptr;
 }
 
-void publish_status_flags(orb_advert_t &vehicle_status_flags_pub) {
-	struct vehicle_status_flags_s v_flags;
-	memset(&v_flags, 0, sizeof(v_flags));
+void publish_status_flags(orb_advert_t &vehicle_status_flags_pub, vehicle_status_flags_s& vehicle_status_flags) {
+
+	vehicle_status_flags_s v_flags = {};
+
 	/* set condition status flags */
 	if (status_flags.condition_calibration_enabled) {
 		v_flags.conditions |= vehicle_status_flags_s::CONDITION_CALIBRATION_ENABLE_MASK;
@@ -4645,10 +4684,18 @@ void publish_status_flags(orb_advert_t &vehicle_status_flags_pub) {
 		v_flags.other_flags |= vehicle_status_flags_s::EVER_HAD_BAROMETER_DATA_MASK;
 	}
 
-	/* publish vehicle_status_flags */
-	if (vehicle_status_flags_pub != nullptr) {
-		orb_publish(ORB_ID(vehicle_status_flags), vehicle_status_flags_pub, &v_flags);
-	} else {
-		vehicle_status_flags_pub = orb_advertise(ORB_ID(vehicle_status_flags), &v_flags);
+	if ((v_flags.conditions != vehicle_status_flags.conditions) ||
+		(v_flags.other_flags != vehicle_status_flags.other_flags) ||
+		(v_flags.circuit_breakers != vehicle_status_flags.circuit_breakers)) {
+
+		/* publish vehicle_status_flags */
+		vehicle_status_flags = v_flags;
+		vehicle_status_flags.timestamp = hrt_absolute_time();
+
+		if (vehicle_status_flags_pub != nullptr) {
+			orb_publish(ORB_ID(vehicle_status_flags), vehicle_status_flags_pub, &vehicle_status_flags);
+		} else {
+			vehicle_status_flags_pub = orb_advertise(ORB_ID(vehicle_status_flags), &vehicle_status_flags);
+		}
 	}
 }
