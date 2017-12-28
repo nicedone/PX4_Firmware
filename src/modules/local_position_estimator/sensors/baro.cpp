@@ -76,7 +76,7 @@ void BlockLocalPositionEstimator::baroCorrect()
 
 	if (beta > BETA_TABLE[n_y_baro]) {
 		if (!(_sensorFault & SENSOR_BARO)) {
-			mavlink_log_critical(&mavlink_log_pub, "[lpe] baro fault, r %5.2f m, beta %5.2f",
+			mavlink_and_console_log_info(&mavlink_log_pub, "[lpe] baro fault, r %5.2f m, beta %5.2f",
 					     double(r(0)), double(beta));
 			_sensorFault |= SENSOR_BARO;
 		}
