@@ -148,16 +148,16 @@ void BlockLocalPositionEstimator::visionCorrect()
 	}
 
 	// kalman filter correction if no fault
-	//if (!(_sensorFault & SENSOR_VISION)) {
-	Matrix<float, n_x, n_y_vision> K = _P * C.transpose() * S_I;
-	Vector<float, n_x> dx = K * r;
-	float dxMax = 0.1f;
-	if (dx.norm() > dxMax) {
-		dx *= dxMax/dx.norm();
+	if (!(_sensorFault & SENSOR_VISION)) {
+		Matrix<float, n_x, n_y_vision> K = _P * C.transpose() * S_I;
+		Vector<float, n_x> dx = K * r;
+		//float dxMax = 1.0f;
+		//if (dx.norm() > dxMax) {
+			//dx *= dxMax/dx.norm();
+		//}
+		_x += dx;
+		_P -= K * C * _P;
 	}
-	_x += dx;
-	_P -= K * C * _P;
-	//}
 }
 
 void BlockLocalPositionEstimator::visionCheckTimeout()

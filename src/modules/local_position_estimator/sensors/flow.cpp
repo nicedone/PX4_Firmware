@@ -195,17 +195,17 @@ void BlockLocalPositionEstimator::flowCorrect()
 		mavlink_and_console_log_info(&mavlink_log_pub, "[lpe] flow OK");
 	}
 
-	//if (!(_sensorFault & SENSOR_FLOW)) {
-	Matrix<float, n_x, n_y_flow> K =
-		_P * C.transpose() * S_I;
-	Vector<float, n_x> dx = K * r;
-	float dxMax = 0.1;
-	if (dx.norm() > dxMax) {
-		dx *= dxMax/dx.norm();
+	if (!(_sensorFault & SENSOR_FLOW)) {
+		Matrix<float, n_x, n_y_flow> K =
+			_P * C.transpose() * S_I;
+		Vector<float, n_x> dx = K * r;
+		//float dxMax = 1.0f;
+		//if (dx.norm() > dxMax) {
+			//dx *= dxMax/dx.norm();
+		//}
+		_x += dx;
+		_P -= K * C * _P;
 	}
-	_x += dx;
-	_P -= K * C * _P;
-	//}
 }
 
 void BlockLocalPositionEstimator::flowCheckTimeout()
