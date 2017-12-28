@@ -322,12 +322,17 @@ void BlockLocalPositionEstimator::update()
 	}
 
 	if (_estimatorInitialized & EST_XY) {
-		// if valid and gps has timed out, set to not valid
-		if (!vxy_stddev_ok && (_sensorTimeout & SENSOR_GPS)) {
+		// if valid and gps not fused or has timed out, set to not valid
+		if (!vxy_stddev_ok && (!(_fusion.get() & FUSE_GPS) || _sensorTimeout & SENSOR_GPS)) {
+			PX4_INFO("lpe xy uninitialized");
 			_estimatorInitialized &= ~EST_XY;
 		}
-
 	} else {
+		// set velocity to zero to level vehicle if measurement lost
+		_x(X_vx) = 0;
+		_x(X_vy) = 0;
+
+		// reinitialize if OK
 		if (vxy_stddev_ok) {
 			if (!(_sensorTimeout & SENSOR_GPS)
 			    || !(_sensorTimeout & SENSOR_FLOW)
@@ -346,11 +351,16 @@ void BlockLocalPositionEstimator::update()
 
 	if (_estimatorInitialized & EST_Z) {
 		// if valid and baro has timed out, set to not valid
-		if (!z_stddev_ok && (_sensorTimeout & SENSOR_BARO)) {
+		if (!z_stddev_ok && (!(_fusion.get() & FUSE_BARO) || _sensorTimeout & SENSOR_BARO)) {
+			PX4_INFO("lpe z uninitialized");
 			_estimatorInitialized &= ~EST_Z;
 		}
 
 	} else {
+		// set velocity to zero to level vehicle if measurement lost
+		_x(X_vz) = 0;
+
+		// reinitialize if OK
 		if (z_stddev_ok) {
 			_estimatorInitialized |= EST_Z;
 		}
@@ -521,12 +531,13 @@ void BlockLocalPositionEstimator::update()
 
 	if (_altOriginInitialized) {
 		// update all publications if possible
-		publishLocalPos();
 		publishEstimatorStatus();
 		_pub_innov.update();
-
-		if ((_estimatorInitialized & EST_XY) && (_map_ref.init_done || _fake_origin.get())) {
-			publishGlobalPos();
+		if ((_estimatorInitialized & EST_XY) && (_estimatorInitialized & EST_Z)) {
+			publishLocalPos();
+			if (_map_ref.init_done || _fake_origin.get()) {
+				publishGlobalPos();
+			}
 		}
 	}
 

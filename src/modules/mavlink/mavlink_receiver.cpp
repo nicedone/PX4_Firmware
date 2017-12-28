@@ -1137,6 +1137,10 @@ MavlinkReceiver::handle_message_local_position_ned_cov(mavlink_message_t *msg)
 	vision_position.eph = sqrtf(fmaxf(pos.covariance[0], pos.covariance[9]));
 	vision_position.epv = sqrtf(pos.covariance[17]);
 
+	//PX4_INFO("receive eph: %10.4f epv: %10.4f\n",
+			//double(vision_position.eph),
+			//double(vision_position.epv));
+
 	vision_position.xy_global = globallocalconverter_initialized();
 	vision_position.z_global = globallocalconverter_initialized();
 	vision_position.ref_timestamp = _global_ref_timestamp;

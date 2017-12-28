@@ -83,6 +83,10 @@ void BlockLocalPositionEstimator::visionCorrect()
 	Matrix<float, n_y_vision, n_y_vision> R;
 	R.setZero();
 
+	//PX4_INFO("eph: %10.4f epv: %10.4f",
+			//double(_sub_vision_pos.get().eph),
+			//double(_sub_vision_pos.get().epv));
+
 	// use error estimates from vision topic if available
 	if (_sub_vision_pos.get().eph > _vision_xy_stddev.get()) {
 		R(Y_vision_x, Y_vision_x) = _sub_vision_pos.get().eph * _sub_vision_pos.get().eph;
@@ -102,13 +106,24 @@ void BlockLocalPositionEstimator::visionCorrect()
 
 	// vision delayed x
 	uint8_t i_hist = 0;
+	float vision_delay = _vision_delay.get();
 
-	float vision_delay = (_timeStamp - _sub_vision_pos.get().timestamp) * 1e-6f;	// measurement delay in seconds
+	// use auto-calculated delay from measurement if the parameter is equal to zero
+	if (_vision_delay.get() < 0.001f) {
+		vision_delay = (_timeStamp - _sub_vision_pos.get().timestamp) * 1e-6f;	// measurement delay in seconds
+	}
 
-	if (vision_delay < 0.0f) { vision_delay = 0.0f; }
+	// check for sane value of delay
+	if (vision_delay < 0.0f || vision_delay > DELAY_MAX) {
+		PX4_INFO("vision_delay out of bounds %10.4f\n", double(vision_delay));
+		return;
+	}
 
-	// use auto-calculated delay from measurement if parameter is set to zero
-	if (getDelayPeriods(_vision_delay.get() > 0.0f ? _vision_delay.get() : vision_delay, &i_hist)  < 0) { return; }
+	// set i_hist to delay periods
+	if (getDelayPeriods(vision_delay, &i_hist)  < 0) {
+		PX4_INFO("failed to get delay periods");
+		return;
+	}
 
 	//mavlink_and_console_log_info(&mavlink_log_pub, "[lpe] vision delay : %0.2f ms", double(vision_delay * 1000.0f));
 
@@ -121,7 +136,7 @@ void BlockLocalPositionEstimator::visionCorrect()
 	// fault detection
 	float beta = (r.transpose() * (S_I * r))(0, 0);
 
-	if (beta > 10*BETA_TABLE[n_y_vision]) {
+	if (beta > BETA_TABLE[n_y_vision]) {
 		if (!(_sensorFault & SENSOR_VISION)) {
 			mavlink_and_console_log_info(&mavlink_log_pub, "[lpe] vision position fault, beta %5.2f", double(beta));
 			_sensorFault |= SENSOR_VISION;
@@ -133,12 +148,15 @@ void BlockLocalPositionEstimator::visionCorrect()
 	}
 
 	// kalman filter correction if no fault
-	if (!(_sensorFault & SENSOR_VISION)) {
-		Matrix<float, n_x, n_y_vision> K = _P * C.transpose() * S_I;
-		Vector<float, n_x> dx = K * r;
-		_x += dx;
-		_P -= K * C * _P;
+	//if (!(_sensorFault & SENSOR_VISION)) {
+	Matrix<float, n_x, n_y_vision> K = _P * C.transpose() * S_I;
+	Vector<float, n_x> dx = K * r;
+	if (dx.norm() > 0.1f) {
+		dx *= 0.1f/dx.norm();
 	}
+	_x += dx;
+	_P -= K * C * _P;
+	//}
 }
 
 void BlockLocalPositionEstimator::visionCheckTimeout()
