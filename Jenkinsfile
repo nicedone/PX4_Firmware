@@ -497,6 +497,7 @@ pipeline {
           }
           post {
             success {
+              sh 'export'
               sh './Tools/upload_log.py -q --description "ROS mission test multirotor_box.mission: ${CHANGE_ID}" --feedback "${CHANGE_TITLE} - ${CHANGE_URL}" --source CI .ros/rootfs/fs/microsd/log/*/*.ulg'
             }
             failure {
