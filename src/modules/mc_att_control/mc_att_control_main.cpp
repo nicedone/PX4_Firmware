@@ -1257,6 +1257,9 @@ MulticopterAttitudeControl::task_main()
 				/* publish controller status */
 				rate_ctrl_status_s rate_ctrl_status;
 				rate_ctrl_status.timestamp = hrt_absolute_time();
+				rate_ctrl_status.rollspeed = _rates_prev(0);
+				rate_ctrl_status.pitchspeed = _rates_prev(1);
+				rate_ctrl_status.yawspeed = _rates_prev(2);
 				rate_ctrl_status.roll_integ = _rates_int(0);
 				rate_ctrl_status.pitch_integ = _rates_int(1);
 				rate_ctrl_status.yaw_integ = _rates_int(2);
