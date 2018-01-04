@@ -1133,7 +1133,11 @@ param_export(int fd, bool only_unsaved)
 out:
 
 	if (result == 0) {
-		result = bson_encoder_fini(&encoder); // this will call fsync
+		result = bson_encoder_fini(&encoder);
+
+		/* zero buffer length at the beginning of the buffer (for bson encoded files) */
+		int32_t len = 0;
+		memcpy(encoder.buf, &len, sizeof(len));
 
 		// write and finish
 		if ((result != 0) || write(fd, encoder.buf, encoder.bufpos) != encoder.bufpos) {

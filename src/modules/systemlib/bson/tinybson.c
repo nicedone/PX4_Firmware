@@ -449,6 +449,12 @@ bson_encoder_fini(bson_encoder_t encoder)
 		CODER_KILL(encoder, "write error on document terminator");
 	}
 
+	/* store buffer length at the beginning of the buffer */
+	if (encoder->buf != NULL) {
+		int32_t len = bson_encoder_buf_size(encoder);
+		memcpy(encoder->buf, &len, sizeof(len));
+	}
+
 	/* sync file */
 	if (encoder->fd > -1) {
 		BSON_FSYNC(encoder->fd);
