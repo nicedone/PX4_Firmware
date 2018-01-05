@@ -51,7 +51,6 @@
 #include <px4_sem.h>
 #include <px4_shutdown.h>
 #include <drivers/drv_hrt.h>
-#include <systemlib/perf_counter.h>
 
 #include <systemlib/uthash/utarray.h>
 #include <systemlib/bson/tinybson.h>
@@ -162,11 +161,6 @@ static px4_sem_t param_sem; ///< this protects against concurrent access to para
 static int reader_lock_holders = 0;
 static px4_sem_t reader_lock_holders_lock; ///< this protects against concurrent access to reader_lock_holders
 
-static perf_counter_t param_export_perf;
-static perf_counter_t param_find_perf;
-static perf_counter_t param_get_perf;
-static perf_counter_t param_set_perf;
-
 static px4_sem_t param_sem_save; ///< this protects against concurrent param saves (file or flash access).
 ///< we use a separate lock to allow concurrent param reads and saves.
 ///< a param_set could still be blocked by a param save, because it
@@ -231,11 +225,6 @@ param_init(void)
 	px4_sem_init(&param_sem, 0, 1);
 	px4_sem_init(&param_sem_save, 0, 1);
 	px4_sem_init(&reader_lock_holders_lock, 0, 1);
-
-	param_export_perf = perf_alloc(PC_ELAPSED, "param_export");
-	param_find_perf = perf_alloc(PC_ELAPSED, "param_find");
-	param_get_perf = perf_alloc(PC_ELAPSED, "param_get");
-	param_set_perf = perf_alloc(PC_ELAPSED, "param_set");
 }
 
 /**
@@ -328,8 +317,6 @@ param_notify_changes(void)
 param_t
 param_find_internal(const char *name, bool notification)
 {
-	perf_begin(param_find_perf);
-
 	param_t middle;
 	param_t front = 0;
 	param_t last = get_param_info_count();
@@ -345,7 +332,6 @@ param_find_internal(const char *name, bool notification)
 				param_set_used_internal(middle);
 			}
 
-			perf_end(param_find_perf);
 			return middle;
 
 		} else if (middle == front) {
@@ -359,8 +345,6 @@ param_find_internal(const char *name, bool notification)
 			front = middle;
 		}
 	}
-
-	perf_end(param_find_perf);
 
 	/* not found */
 	return PARAM_INVALID;
@@ -585,7 +569,6 @@ param_get(param_t param, void *val)
 	int result = -1;
 
 	param_lock_reader();
-	perf_begin(param_get_perf);
 
 	const void *v = param_get_value_ptr(param);
 
@@ -594,7 +577,6 @@ param_get(param_t param, void *val)
 		result = 0;
 	}
 
-	perf_end(param_get_perf);
 	param_unlock_reader();
 
 	return result;
@@ -687,7 +669,6 @@ param_set_internal(param_t param, const void *val, bool mark_saved, bool notify_
 	bool params_changed = false;
 
 	param_lock_writer();
-	perf_begin(param_set_perf);
 
 	if (param_values == NULL) {
 		utarray_new(param_values, &param_icd);
@@ -767,7 +748,6 @@ param_set_internal(param_t param, const void *val, bool mark_saved, bool notify_
 	}
 
 out:
-	perf_end(param_set_perf);
 	param_unlock_writer();
 
 	/*
@@ -1022,8 +1002,6 @@ param_load_default(void)
 int
 param_export(int fd, bool only_unsaved)
 {
-	perf_begin(param_export_perf);
-
 	struct param_wbuf_s *s = NULL;
 	int	result = -1;
 
@@ -1155,8 +1133,6 @@ out:
 	if (shutdown_lock_ret == 0) {
 		px4_shutdown_unlock();
 	}
-
-	perf_end(param_export_perf);
 
 	return result;
 }
