@@ -66,7 +66,7 @@ Mission::Mission(Navigator *navigator, const char *name) :
 	_param_dist_between_wps(this, "MIS_DIST_WPS", false),
 	_param_altmode(this, "MIS_ALTMODE", false),
 	_param_yawmode(this, "MIS_YAWMODE", false),
-	_param_mnt_yaw_ctl(this, "MNT_YAW_CTL", false),
+	_param_mnt_yaw_ctl(this, "MIS_MNT_YAW_CTL", false),
 	_param_fw_climbout_diff(this, "FW_CLMBOUT_DIFF", false),
 	_missionFeasibilityChecker(navigator)
 {
