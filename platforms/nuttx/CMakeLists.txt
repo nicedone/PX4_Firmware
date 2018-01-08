@@ -44,6 +44,9 @@ CYGPATH(PX4_BINARY_DIR PX4_BINARY_DIR_CYG)
 
 target_link_libraries(${FW_NAME}
 
+	-nodefaultlibs
+	-nostdlib
+
 	-Wl,--script=${PX4_BINARY_DIR_CYG}/NuttX/nuttx/configs/${BOARD}/scripts/${LD_SCRIPT}
 	-Wl,-Map=${CONFIG}.map
 	-Wl,--warn-common,--gc-sections

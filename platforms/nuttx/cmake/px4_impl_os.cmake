@@ -301,7 +301,7 @@ function(px4_nuttx_configure)
 		set(CMAKE_SYSTEM_PROCESSOR "cortex-m3" PARENT_SCOPE)
 	endif()
 	set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL "system processor" FORCE)
-	set(CMAKE_TOOLCHAIN_FILE ${PX4_SOURCE_DIR}/cmake/toolchains/Toolchain-arm-none-eabi.cmake CACHE INTERNAL "toolchain file" FORCE)
+	set(CMAKE_TOOLCHAIN_FILE toolchains/Toolchain-arm-none-eabi CACHE INTERNAL "toolchain file" FORCE)
 
 	# ROMFS
 	if("${ROMFS}" STREQUAL "y")
